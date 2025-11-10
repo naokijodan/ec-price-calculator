@@ -1127,13 +1127,16 @@
             const refProfitDDU = revenueDDU - feesDDU - costDDU - settings.shippingCost;
 
             // DDP価格からの計算
+            // DDP価格には関税が含まれているため、まず販売価格（DDU）を逆算
             const sellingPriceDDP = parseFloat(document.getElementById('sellingPriceDDP3').value);
             const revenueDDP = sellingPriceDDP * settings.exchangeRate;
             const netRevenueDDP = revenueDDP * netRate;
+
+            // 仕入れ価格 = (DDP価格 × 為替 × netRate - 利益 - 送料 - 通関手数料) / (1 + 関税率 × 安全係数)
             const costDDP = (netRevenueDDP - profitJPY - settings.shippingCost - settings.customsFee) / (1 + settings.tariffRate * settings.safetyFactor);
 
-            const feesDDP = revenueDDP * (settings.feeRate + settings.adRate + settings.payoneerRate);
-            const refProfitDDP = revenueDDP - feesDDP - costDDP - settings.shippingCost;
+            // 参考利益 = 設定した利益額（profitJPY）そのもの
+            const refProfitDDP = profitJPY;
 
             // DDU結果表示
             document.getElementById('result3-ddu').classList.remove('hidden');
@@ -1176,8 +1179,9 @@
             const netRevenueDDP = revenueDDP * netRate;
             const costDDP = (netRevenueDDP - settings.shippingCost - settings.customsFee) / (1 + settings.tariffRate * settings.safetyFactor);
 
+            // 参考利益 = 収入 × 利益率（手数料引く前の収入に対する利益率）
             const feesDDP = revenueDDP * (settings.feeRate + settings.adRate + settings.payoneerRate);
-            const refProfitDDP = revenueDDP - feesDDP - costDDP - settings.shippingCost;
+            const refProfitDDP = revenueDDP - feesDDP - costDDP - settings.shippingCost - (costDDP * settings.tariffRate * settings.safetyFactor + settings.customsFee);
 
             // DDU結果表示
             document.getElementById('result4-ddu').classList.remove('hidden');
