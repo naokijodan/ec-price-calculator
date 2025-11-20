@@ -527,7 +527,7 @@
                         <option value="table">テーブル計算</option>
                     </select>
                 </div>
-                <!-- 2段目：関税率、VAT率、通関処理手数料率、MPF、EU送料差額 -->
+                <!-- 2段目：関税率、VAT率、関税処理手数料率、米国通関処理手数料、MPF、EU送料差額 -->
                 <div class="input-group">
                     <label>関税率 (%)</label>
                     <input type="number" id="tariffRate" value="15" step="0.1">
@@ -537,12 +537,16 @@
                     <input type="number" id="vatRate" value="0" step="0.1">
                 </div>
                 <div class="input-group">
-                    <label>通関処理手数料率 (%)</label>
-                    <input type="number" id="processingFeeRate" value="2" step="0.1">
+                    <label>関税処理手数料率 (%)</label>
+                    <input type="number" id="processingFeeRate" value="2.1" step="0.1">
                 </div>
                 <div class="input-group">
-                    <label>MPF (円)</label>
+                    <label>米国通関処理手数料 (円)</label>
                     <input type="number" id="mpf" value="296" step="1">
+                </div>
+                <div class="input-group">
+                    <label>MPF ($) <span style="font-size: 0.85em; color: #6c757d;">※Cpass免除</span></label>
+                    <input type="number" id="mpfUsd" value="0" step="0.01">
                 </div>
                 <div class="input-group">
                     <label>EU送料差額 (円)</label>
@@ -1371,6 +1375,7 @@
                 vatRate: parseFloat(document.getElementById('vatRate').value) / 100,
                 processingFeeRate: parseFloat(document.getElementById('processingFeeRate').value) / 100,
                 mpf: parseFloat(document.getElementById('mpf').value),
+                mpfUsd: parseFloat(document.getElementById('mpfUsd').value),
                 euShippingDiff: parseFloat(document.getElementById('euShippingDiff').value),
                 adRate: parseFloat(document.getElementById('adRate').value) / 100,
                 feeRate: parseFloat(document.getElementById('feeRate').value) / 100,
@@ -1411,6 +1416,9 @@
                 }
                 if (settings.mpf !== undefined) {
                     document.getElementById('mpf').value = settings.mpf;
+                }
+                if (settings.mpfUsd !== undefined) {
+                    document.getElementById('mpfUsd').value = settings.mpfUsd;
                 }
                 if (settings.euShippingDiff !== undefined) {
                     document.getElementById('euShippingDiff').value = settings.euShippingDiff;
