@@ -637,7 +637,7 @@
                         <div class="settings-grid">
                             <div class="input-group">
                                 <label>配送方法</label>
-                                <select id="shippingMethod" onchange="calculateEstimatedShipping()">
+                                <select id="shippingMethod" onchange="calculateVolumetricWeight()">
                                     <option value="自動選択">自動選択</option>
                                     <option value="EP">eパケット</option>
                                     <option value="CF">Cpass-FedEx</option>
@@ -1165,9 +1165,22 @@
             const length = parseFloat(document.getElementById('packageLength').value) || 0;
             const width = parseFloat(document.getElementById('packageWidth').value) || 0;
             const height = parseFloat(document.getElementById('packageHeight').value) || 0;
+            const shippingMethod = document.getElementById('shippingMethod').value;
 
-            // 容積重量 = 長さ × 幅 × 高さ ÷ 6000
-            const volumetricWeight = Math.round((length * width * height) / 6);
+            // 配送方法によって容積重量の計算式を変更
+            // Cpass-Economy（CE）: 体積 ÷ 8、それ以外: 体積 ÷ 5
+            const volume = length * width * height;
+            let volumetricWeight;
+
+            if (shippingMethod === 'CE') {
+                volumetricWeight = Math.round(volume / 8);
+            } else {
+                volumetricWeight = Math.round(volume / 5);
+            }
+
+            // 最小値200gを適用
+            volumetricWeight = Math.max(volumetricWeight, 200);
+
             document.getElementById('volumetricWeight').value = volumetricWeight;
 
             // 送料試算も更新
