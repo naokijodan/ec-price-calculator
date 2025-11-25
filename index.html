@@ -848,7 +848,8 @@
                     </div>
                     <div class="formula">
                         <strong>計算式:</strong><br>
-                        仕入れ価格 = (DDP価格 × 為替 × netRate - 利益 - 送料 - MPF - EU送料差額) ÷ (1 + (関税率 + VAT率) × (1 + 通関処理手数料率))
+                        ① DDU販売価格 = DDP価格 - 想定関税（反復計算で求める）<br>
+                        ② 仕入れ価格 = DDU販売価格 × 為替 × netRate - 送料 - 利益
                     </div>
                 </div>
             </div>
@@ -931,7 +932,8 @@
                     </div>
                     <div class="formula">
                         <strong>計算式:</strong><br>
-                        仕入れ価格 = (DDP価格 × 為替 × netRate - 送料 - MPF - EU送料差額) ÷ (1 + (関税率 + VAT率) × (1 + 通関処理手数料率))
+                        ① DDU販売価格 = DDP価格 - 想定関税（反復計算で求める）<br>
+                        ② 仕入れ価格 = DDU販売価格 × 為替 × netRate - 送料
                     </div>
                 </div>
             </div>
