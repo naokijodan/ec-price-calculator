@@ -1166,13 +1166,30 @@
             const width = parseFloat(document.getElementById('packageWidth').value) || 0;
             const height = parseFloat(document.getElementById('packageHeight').value) || 0;
             const shippingMethod = document.getElementById('shippingMethod').value;
+            const actualWeight = parseFloat(document.getElementById('actualWeight').value) || 0;
 
             // 配送方法によって容積重量の計算式を変更
             // Cpass-Economy（CE）: 体積 ÷ 8、それ以外: 体積 ÷ 5
             const volume = length * width * height;
             let volumetricWeight;
+            let actualMethod = shippingMethod;
 
-            if (shippingMethod === 'CE') {
+            // 自動選択の場合、実際に使われる配送方法を判定
+            if (shippingMethod === '自動選択') {
+                const settings = getSettings();
+                const lowMethod = settings.lowPriceMethod || 'EP';
+                const highMethod = settings.highPriceMethod || 'CF';
+
+                // lowMethodがEPで実重量が2000g以下の場合はEP、それ以外はhighMethod
+                if (lowMethod === 'EP' && actualWeight <= 2000) {
+                    actualMethod = 'EP';
+                } else {
+                    actualMethod = highMethod;
+                }
+            }
+
+            // 実際に使われる配送方法に基づいて容積重量を計算
+            if (actualMethod === 'CE') {
                 volumetricWeight = Math.round(volume / 8);
             } else {
                 volumetricWeight = Math.round(volume / 5);
@@ -1351,9 +1368,7 @@
         }
 
         // 送料計算メイン関数
-        function calculateShippingCost(costYen, actualWeight, volWeight, method, threshold, lowMethod, highMethod) {
-            const chargeableWeight = Math.max(actualWeight || 0, volWeight || 0);
-
+        function calculateShippingCost(costYen, actualWeight, volWeight, method, threshold, lowMethod, highMethod, volume) {
             // 固定モード判定
             if (!actualWeight && !volWeight) {
                 return parseFloat(document.getElementById('shippingCost').value) || 3000;
@@ -1361,19 +1376,46 @@
 
             // テーブルモード
             if (method && method !== '自動選択') {
+                // 配送方法に応じて容積重量を再計算
+                const recalcVolWeight = calculateVolWeightByMethod(method, volume);
+                const chargeableWeight = Math.max(actualWeight || 0, recalcVolWeight || 0);
                 return calculateSpecificMethodRate(method, actualWeight, chargeableWeight);
             }
 
-            // 自動選択
+            // 自動選択：実際に使用される配送方法を判定
+            let actualMethod;
             if (lowMethod === 'NONE' || costYen >= threshold) {
-                return calculateSpecificMethodRate(highMethod, actualWeight, chargeableWeight);
+                actualMethod = highMethod;
             } else {
                 if (lowMethod === 'EP' && actualWeight <= 2000) {
-                    return getEpacketRate(actualWeight);
+                    actualMethod = 'EP';
                 } else {
-                    return calculateSpecificMethodRate(highMethod, actualWeight, chargeableWeight);
+                    actualMethod = highMethod;
                 }
             }
+
+            // 判定された配送方法に応じて容積重量を再計算
+            const recalcVolWeight = calculateVolWeightByMethod(actualMethod, volume);
+            const chargeableWeight = Math.max(actualWeight || 0, recalcVolWeight || 0);
+
+            if (actualMethod === 'EP') {
+                return getEpacketRate(actualWeight);
+            } else {
+                return calculateSpecificMethodRate(actualMethod, actualWeight, chargeableWeight);
+            }
+        }
+
+        // 配送方法に応じた容積重量計算
+        function calculateVolWeightByMethod(method, volume) {
+            if (!volume) return 0;
+
+            let volumetricWeight;
+            if (method === 'CE') {
+                volumetricWeight = Math.round(volume / 8);
+            } else {
+                volumetricWeight = Math.round(volume / 5);
+            }
+            return Math.max(volumetricWeight, 200);
         }
 
         // 配送方法別の料金計算
@@ -1509,6 +1551,7 @@
             const profitJPY = parseFloat(document.getElementById('profit1').value);
 
             // 送料計算
+            const volume = settings.packageLength * settings.packageWidth * settings.packageHeight;
             const shippingCostJPY = calculateShippingCost(
                 costJPY,
                 settings.actualWeight,
@@ -1516,7 +1559,8 @@
                 settings.shippingMethod,
                 settings.shippingThreshold,
                 settings.lowPriceMethod,
-                settings.highPriceMethod
+                settings.highPriceMethod,
+                volume
             );
 
             // 計算ロジック
@@ -1558,6 +1602,7 @@
             const profitRate = parseFloat(document.getElementById('profitRate2').value) / 100;
 
             // 送料計算
+            const volume = settings.packageLength * settings.packageWidth * settings.packageHeight;
             const shippingCostJPY = calculateShippingCost(
                 costJPY,
                 settings.actualWeight,
@@ -1565,7 +1610,8 @@
                 settings.shippingMethod,
                 settings.shippingThreshold,
                 settings.lowPriceMethod,
-                settings.highPriceMethod
+                settings.highPriceMethod,
+                volume
             );
 
             // スプレッドシートの式: B16 = (仕入れ + 送料) / (1 - (利益率 + 広告費率 + 手数料率 + ペイオニア率)) / 為替
@@ -1614,6 +1660,7 @@
             let prevCostDDU = 0;
 
             for (let i = 0; i < 10; i++) {
+                const volume = settings.packageLength * settings.packageWidth * settings.packageHeight;
                 shippingCostDDU = calculateShippingCost(
                     costDDU,
                     settings.actualWeight,
@@ -1621,7 +1668,8 @@
                     settings.shippingMethod,
                     settings.shippingThreshold,
                     settings.lowPriceMethod,
-                    settings.highPriceMethod
+                    settings.highPriceMethod,
+                    volume
                 );
                 prevCostDDU = costDDU;
                 costDDU = netRevenueDDU - shippingCostDDU - profitJPY;
@@ -1667,6 +1715,7 @@
             let prevCostDDP = 0;
 
             for (let i = 0; i < 10; i++) {
+                const volume = settings.packageLength * settings.packageWidth * settings.packageHeight;
                 shippingCostDDP = calculateShippingCost(
                     costDDP,
                     settings.actualWeight,
@@ -1674,7 +1723,8 @@
                     settings.shippingMethod,
                     settings.shippingThreshold,
                     settings.lowPriceMethod,
-                    settings.highPriceMethod
+                    settings.highPriceMethod,
+                    volume
                 );
                 prevCostDDP = costDDP;
                 costDDP = netRevenueDDP - shippingCostDDP - profitJPY;
@@ -1718,6 +1768,7 @@
             let prevCostDDU = 0;
 
             for (let i = 0; i < 10; i++) {
+                const volume = settings.packageLength * settings.packageWidth * settings.packageHeight;
                 shippingCostDDU = calculateShippingCost(
                     costDDU,
                     settings.actualWeight,
@@ -1725,7 +1776,8 @@
                     settings.shippingMethod,
                     settings.shippingThreshold,
                     settings.lowPriceMethod,
-                    settings.highPriceMethod
+                    settings.highPriceMethod,
+                    volume
                 );
                 prevCostDDU = costDDU;
                 costDDU = revenueDDU * netRate - shippingCostDDU;
@@ -1771,6 +1823,7 @@
             let prevCostDDP = 0;
 
             for (let i = 0; i < 10; i++) {
+                const volume = settings.packageLength * settings.packageWidth * settings.packageHeight;
                 shippingCostDDP = calculateShippingCost(
                     costDDP,
                     settings.actualWeight,
@@ -1778,7 +1831,8 @@
                     settings.shippingMethod,
                     settings.shippingThreshold,
                     settings.lowPriceMethod,
-                    settings.highPriceMethod
+                    settings.highPriceMethod,
+                    volume
                 );
                 prevCostDDP = costDDP;
                 costDDP = netRevenueDDP - shippingCostDDP;
