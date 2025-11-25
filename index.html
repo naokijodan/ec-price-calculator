@@ -1180,10 +1180,10 @@
                 const lowMethod = settings.lowPriceMethod || 'EP';
                 const highMethod = settings.highPriceMethod || 'CF';
 
-                // lowMethodがEPで実重量が2000g以下の場合はEP、それ以外はhighMethod
-                if (lowMethod === 'EP' && actualWeight <= 2000) {
-                    actualMethod = 'EP';
-                } else {
+                // 基本的には低価格配送方法を使用
+                actualMethod = lowMethod;
+                // ただし、eパケットで重量オーバーの場合は高価格配送方法
+                if (lowMethod === 'EP' && actualWeight > 2000) {
                     actualMethod = highMethod;
                 }
             }
@@ -1233,14 +1233,21 @@
                 const highMethod = settings.highPriceMethod || 'CF';
 
                 // 仮の仕入れ価格を0として判定（実際の計算では動的に変わる）
-                if (lowMethod === 'EP' && actualWeight <= 2000) {
+                // 基本的には低価格配送方法を使用
+                let selectedMethod = lowMethod;
+                // ただし、eパケットで重量オーバーの場合は高価格配送方法
+                if (lowMethod === 'EP' && actualWeight > 2000) {
+                    selectedMethod = highMethod;
+                }
+
+                if (selectedMethod === 'EP') {
                     shippingCost = getEpacketRate(actualWeight);
                     actualMethod = 'eパケット';
                     chargeableWeight = actualWeight; // eパケットは実重量のみ
                 } else {
                     chargeableWeight = Math.max(actualWeight, volumetricWeight);
-                    shippingCost = calculateSpecificMethodRate(highMethod, actualWeight, chargeableWeight);
-                    actualMethod = getMethodName(highMethod);
+                    shippingCost = calculateSpecificMethodRate(selectedMethod, actualWeight, chargeableWeight);
+                    actualMethod = getMethodName(selectedMethod);
                 }
             } else {
                 shippingCost = calculateSpecificMethodRate(method, actualWeight, chargeableWeight);
@@ -1387,9 +1394,10 @@
             if (lowMethod === 'NONE' || costYen >= threshold) {
                 actualMethod = highMethod;
             } else {
-                if (lowMethod === 'EP' && actualWeight <= 2000) {
-                    actualMethod = 'EP';
-                } else {
+                // 低価格配送方法を使用
+                actualMethod = lowMethod;
+                // ただし、eパケットで重量オーバーの場合は高価格配送方法
+                if (lowMethod === 'EP' && actualWeight > 2000) {
                     actualMethod = highMethod;
                 }
             }
