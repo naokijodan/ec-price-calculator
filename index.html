@@ -1512,9 +1512,9 @@
 
             // 想定関税 = 関税額 + 関税処理手数料 + (米国通関処理手数料円 ÷ 為替) + MPF$ + (EU送料差額円 ÷ 為替)
             // 関税額 = 販売価格 × 関税率
-            // 関税処理手数料 = (販売価格 × 関税率 × (1 + 関税処理手数料率)) + (販売価格 × VAT率 × (1 + 関税処理手数料率))
+            // 関税処理手数料 = (販売価格 × 関税率 × 関税処理手数料率) + (販売価格 × VAT率 × 関税処理手数料率)
             let tariffUSD = sellingPriceUSD * settings.tariffRate * (1 + settings.processingFeeRate)
-                          + sellingPriceUSD * settings.vatRate * (1 + settings.processingFeeRate)
+                          + sellingPriceUSD * settings.vatRate * settings.processingFeeRate
                           + (settings.mpf / settings.exchangeRate)
                           + settings.mpfUsd
                           + (settings.euShippingDiff / settings.exchangeRate);
@@ -1560,9 +1560,9 @@
 
             // 想定関税 = 関税額 + 関税処理手数料 + (米国通関処理手数料円 ÷ 為替) + MPF$ + (EU送料差額円 ÷ 為替)
             // 関税額 = 販売価格 × 関税率
-            // 関税処理手数料 = (販売価格 × 関税率 × (1 + 関税処理手数料率)) + (販売価格 × VAT率 × (1 + 関税処理手数料率))
+            // 関税処理手数料 = (販売価格 × 関税率 × 関税処理手数料率) + (販売価格 × VAT率 × 関税処理手数料率)
             let tariffUSD = sellingPriceUSD * settings.tariffRate * (1 + settings.processingFeeRate)
-                          + sellingPriceUSD * settings.vatRate * (1 + settings.processingFeeRate)
+                          + sellingPriceUSD * settings.vatRate * settings.processingFeeRate
                           + (settings.mpf / settings.exchangeRate)
                           + settings.mpfUsd
                           + (settings.euShippingDiff / settings.exchangeRate);
@@ -1616,7 +1616,7 @@
 
             // 想定関税
             const tariffDDU = sellingPriceDDU * settings.tariffRate * (1 + settings.processingFeeRate)
-                            + sellingPriceDDU * settings.vatRate * (1 + settings.processingFeeRate)
+                            + sellingPriceDDU * settings.vatRate * settings.processingFeeRate
                             + (settings.mpf / settings.exchangeRate)
                             + settings.mpfUsd
                             + (settings.euShippingDiff / settings.exchangeRate);
@@ -1633,7 +1633,7 @@
 
             for (let i = 0; i < 10; i++) {
                 tariffDDP = sellingPriceDDU_fromDDP * settings.tariffRate * (1 + settings.processingFeeRate)
-                          + sellingPriceDDU_fromDDP * settings.vatRate * (1 + settings.processingFeeRate)
+                          + sellingPriceDDU_fromDDP * settings.vatRate * settings.processingFeeRate
                           + (settings.mpf / settings.exchangeRate)
                           + settings.mpfUsd
                           + (settings.euShippingDiff / settings.exchangeRate);
@@ -1720,7 +1720,7 @@
 
             // 想定関税
             const tariffDDU = sellingPriceDDU * settings.tariffRate * (1 + settings.processingFeeRate)
-                            + sellingPriceDDU * settings.vatRate * (1 + settings.processingFeeRate)
+                            + sellingPriceDDU * settings.vatRate * settings.processingFeeRate
                             + (settings.mpf / settings.exchangeRate)
                             + settings.mpfUsd
                             + (settings.euShippingDiff / settings.exchangeRate);
@@ -1737,7 +1737,7 @@
 
             for (let i = 0; i < 10; i++) {
                 tariffDDP = sellingPriceDDU_fromDDP * settings.tariffRate * (1 + settings.processingFeeRate)
-                          + sellingPriceDDU_fromDDP * settings.vatRate * (1 + settings.processingFeeRate)
+                          + sellingPriceDDU_fromDDP * settings.vatRate * settings.processingFeeRate
                           + (settings.mpf / settings.exchangeRate)
                           + settings.mpfUsd
                           + (settings.euShippingDiff / settings.exchangeRate);
