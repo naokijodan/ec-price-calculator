@@ -1251,9 +1251,9 @@
             const volume = length * width * height;
 
             // CF/CD/EL/EMS用（÷5）
-            const volWeight5 = Math.max(Math.round(volume / 5), 200);
+            const volWeight5 = Math.max(Math.round(volume / 5), 100);
             // CE用（÷8）
-            const volWeight8 = Math.max(Math.round(volume / 8), 200);
+            const volWeight8 = Math.max(Math.round(volume / 8), 100);
 
             document.getElementById('volumetricWeight').value = volWeight5;
             document.getElementById('volumetricWeightCE').value = volWeight8;
@@ -1517,7 +1517,7 @@
             } else {
                 volumetricWeight = Math.round(volume / 5);
             }
-            return Math.max(volumetricWeight, 200);
+            return Math.max(volumetricWeight, 100);
         }
 
         // 配送方法別の料金計算
