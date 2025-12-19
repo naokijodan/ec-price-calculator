@@ -1671,10 +1671,13 @@
                 settings.shippingMode
             );
 
-            // 計算ロジック
-            // 販売価格 = (仕入れ + 送料 + 利益) / 為替 / (1 - 手数料率 - 広告費率 - ペイオニア率)
+            // 計算ロジック（DDP価格ベースで手数料計算）
+            // tariffMultiplier = 1 + 関税率 × (1 + 関税処理手数料率)
+            // 販売価格 = (仕入れ + 送料 + 利益) / 為替 / [(1 - ペイオニア率) - tariffMultiplier × (手数料率 + 広告費率)]
             const totalCostJPY = costJPY + shippingCostJPY + profitJPY;
-            const netRate = 1 - settings.feeRate - settings.adRate - settings.payoneerRate;
+            const tariffMultiplier = 1 + settings.tariffRate * (1 + settings.processingFeeRate);
+            const feeAdRate = settings.feeRate + settings.adRate;
+            const netRate = (1 - settings.payoneerRate) - tariffMultiplier * feeAdRate;
             let sellingPriceUSD = totalCostJPY / settings.exchangeRate / netRate;
 
             // 想定関税 = 関税額 + 関税処理手数料 + (通関手数料円 ÷ 為替) + MPF$ + (EU送料差額円 ÷ 為替)
@@ -1695,10 +1698,11 @@
             // DDP価格 = 販売価格 + 想定関税
             const ddpPrice = sellingPriceUSD + tariffUSD;
 
-            // 参考利益（再計算）
+            // 参考利益（再計算）- DDP価格ベースで手数料計算
             const revenue = sellingPriceUSD * settings.exchangeRate;
-            const fees = revenue * (settings.feeRate + settings.adRate + settings.payoneerRate);
-            const refProfit = revenue - fees - costJPY - shippingCostJPY;
+            const payoneerFee = revenue * settings.payoneerRate;
+            const ddpFees = ddpPrice * settings.exchangeRate * (settings.feeRate + settings.adRate);
+            const refProfit = revenue - payoneerFee - ddpFees - costJPY - shippingCostJPY;
 
             // 結果表示
             document.getElementById('result1').classList.remove('hidden');
@@ -1729,9 +1733,13 @@
                 settings.shippingMode
             );
 
-            // スプレッドシートの式: B16 = (仕入れ + 送料) / (1 - (利益率 + 広告費率 + 手数料率 + ペイオニア率)) / 為替
+            // DDP価格ベースで手数料計算
+            // tariffMultiplier = 1 + 関税率 × (1 + 関税処理手数料率)
+            // 販売価格 = (仕入れ + 送料) / 為替 / [(1 - ペイオニア率) - tariffMultiplier × (手数料率 + 広告費率) - 利益率]
             const baseCost = costJPY + shippingCostJPY;
-            const netRate = 1 - profitRate - settings.feeRate - settings.adRate - settings.payoneerRate;
+            const tariffMultiplier = 1 + settings.tariffRate * (1 + settings.processingFeeRate);
+            const feeAdRate = settings.feeRate + settings.adRate;
+            const netRate = (1 - settings.payoneerRate) - tariffMultiplier * feeAdRate - profitRate;
             let sellingPriceUSD = baseCost / settings.exchangeRate / netRate;
 
             // 想定関税 = 関税額 + 関税処理手数料 + (通関手数料円 ÷ 為替) + MPF$ + (EU送料差額円 ÷ 為替)
@@ -1752,9 +1760,11 @@
             // DDP価格 = 販売価格 + 想定関税
             const ddpPrice = sellingPriceUSD + tariffUSD;
 
+            // 参考利益 - DDP価格ベースで手数料計算
             const revenue = sellingPriceUSD * settings.exchangeRate;
-            const fees = revenue * (settings.feeRate + settings.adRate + settings.payoneerRate);
-            const refProfit = revenue - fees - costJPY - shippingCostJPY;
+            const payoneerFee = revenue * settings.payoneerRate;
+            const ddpFees = ddpPrice * settings.exchangeRate * (settings.feeRate + settings.adRate);
+            const refProfit = revenue - payoneerFee - ddpFees - costJPY - shippingCostJPY;
 
             document.getElementById('result2').classList.remove('hidden');
             document.getElementById('sellingPrice2').textContent = `$${sellingPriceUSD.toFixed(2)}`;
@@ -1768,12 +1778,18 @@
         function calculateCostFromPriceProfit() {
             const settings = getSettings();
             const profitJPY = parseFloat(document.getElementById('profit3').value);
-            const netRate = 1 - settings.feeRate - settings.adRate - settings.payoneerRate;
+
+            // DDP価格ベースで手数料計算
+            const tariffMultiplier = 1 + settings.tariffRate * (1 + settings.processingFeeRate);
+            const feeAdRate = settings.feeRate + settings.adRate;
 
             // DDU価格からの計算（反復計算で仕入れ価格と送料を収束させる）
             const sellingPriceDDU = parseFloat(document.getElementById('sellingPriceDDU3').value);
             const revenueDDU = sellingPriceDDU * settings.exchangeRate;
-            const netRevenueDDU = revenueDDU * netRate;
+            // DDP価格ベースでの手数料を考慮した純収入
+            const ddpFeesDDU = revenueDDU * tariffMultiplier * feeAdRate;
+            const payoneerFeeDDU = revenueDDU * settings.payoneerRate;
+            const netRevenueDDU = revenueDDU - payoneerFeeDDU - ddpFeesDDU;
 
             // 反復計算
             let costDDU = netRevenueDDU - profitJPY;
@@ -1811,8 +1827,11 @@
                             + settings.mpfUsd
                             + (settings.euShippingDiff / settings.exchangeRate);
 
-            const feesDDU = revenueDDU * (settings.feeRate + settings.adRate + settings.payoneerRate);
-            const refProfitDDU = revenueDDU - feesDDU - costDDU - shippingCostDDU;
+            // DDP価格ベースで参考利益計算
+            const ddpPriceDDU = sellingPriceDDU + tariffDDU;
+            const ddpFeesDDU_ref = ddpPriceDDU * settings.exchangeRate * feeAdRate;
+            const payoneerFeeDDU_ref = revenueDDU * settings.payoneerRate;
+            const refProfitDDU = revenueDDU - payoneerFeeDDU_ref - ddpFeesDDU_ref - costDDU - shippingCostDDU;
 
             // DDP価格からの計算（反復計算でDDU販売価格を逆算）
             const ddpPriceInput = parseFloat(document.getElementById('sellingPriceDDP3').value);
@@ -1840,9 +1859,11 @@
                 sellingPriceDDU_fromDDP = newSellingPrice;
             }
 
-            // 仕入れ価格を反復計算で求める
+            // 仕入れ価格を反復計算で求める - DDP価格ベースで手数料計算
             const revenueDDP = sellingPriceDDU_fromDDP * settings.exchangeRate;
-            const netRevenueDDP = revenueDDP * netRate;
+            const ddpFeesDDP = ddpPriceInput * settings.exchangeRate * feeAdRate;
+            const payoneerFeeDDP = revenueDDP * settings.payoneerRate;
+            const netRevenueDDP = revenueDDP - payoneerFeeDDP - ddpFeesDDP;
 
             let costDDP = netRevenueDDP - profitJPY;
             let shippingCostDDP = 0;
@@ -1867,9 +1888,8 @@
                 if (Math.abs(costDDP - prevCostDDP) < 1) break;
             }
 
-            // 参考利益
-            const feesDDP = revenueDDP * (settings.feeRate + settings.adRate + settings.payoneerRate);
-            const refProfitDDP = revenueDDP - feesDDP - costDDP - shippingCostDDP;
+            // 参考利益 - DDP価格ベースで手数料計算（既に計算済みの値を再利用）
+            const refProfitDDP = revenueDDP - payoneerFeeDDP - ddpFeesDDP - costDDP - shippingCostDDP;
 
             // DDU結果表示
             document.getElementById('result3-ddu').classList.remove('hidden');
@@ -1891,14 +1911,23 @@
         function calculateCostFromPriceProfitRate() {
             const settings = getSettings();
             const profitRate = parseFloat(document.getElementById('profitRate4').value) / 100;
-            const netRate = 1 - profitRate - settings.feeRate - settings.adRate - settings.payoneerRate;
+
+            // DDP価格ベースで手数料計算
+            const tariffMultiplier = 1 + settings.tariffRate * (1 + settings.processingFeeRate);
+            const feeAdRate = settings.feeRate + settings.adRate;
 
             // DDU価格からの計算（反復計算で仕入れ価格と送料を収束させる）
             const sellingPriceDDU = parseFloat(document.getElementById('sellingPriceDDU4').value);
             const revenueDDU = sellingPriceDDU * settings.exchangeRate;
 
+            // DDP価格ベースでの手数料を考慮した純収入（利益率分も差し引く）
+            const ddpFeesDDU = revenueDDU * tariffMultiplier * feeAdRate;
+            const payoneerFeeDDU = revenueDDU * settings.payoneerRate;
+            const profitAmountDDU = revenueDDU * profitRate;
+            const netRevenueDDU = revenueDDU - payoneerFeeDDU - ddpFeesDDU - profitAmountDDU;
+
             // 反復計算
-            let costDDU = revenueDDU * netRate;
+            let costDDU = netRevenueDDU;
             let shippingCostDDU = 0;
             let prevCostDDU = 0;
 
@@ -1916,7 +1945,7 @@
                     settings.shippingMode
                 );
                 prevCostDDU = costDDU;
-                costDDU = revenueDDU * netRate - shippingCostDDU;
+                costDDU = netRevenueDDU - shippingCostDDU;
 
                 if (Math.abs(costDDU - prevCostDDU) < 1) break;
             }
@@ -1933,8 +1962,11 @@
                             + settings.mpfUsd
                             + (settings.euShippingDiff / settings.exchangeRate);
 
-            const feesDDU = revenueDDU * (settings.feeRate + settings.adRate + settings.payoneerRate);
-            const refProfitDDU = revenueDDU - feesDDU - costDDU - shippingCostDDU;
+            // DDP価格ベースで参考利益計算
+            const ddpPriceDDU = sellingPriceDDU + tariffDDU;
+            const ddpFeesDDU_ref = ddpPriceDDU * settings.exchangeRate * feeAdRate;
+            const payoneerFeeDDU_ref = revenueDDU * settings.payoneerRate;
+            const refProfitDDU = revenueDDU - payoneerFeeDDU_ref - ddpFeesDDU_ref - costDDU - shippingCostDDU;
 
             // DDP価格からの計算（反復計算でDDU販売価格を逆算）
             const ddpPriceInput = parseFloat(document.getElementById('sellingPriceDDP4').value);
@@ -1962,9 +1994,12 @@
                 sellingPriceDDU_fromDDP = newSellingPrice;
             }
 
-            // 仕入れ価格を反復計算で求める
+            // 仕入れ価格を反復計算で求める - DDP価格ベースで手数料計算
             const revenueDDP = sellingPriceDDU_fromDDP * settings.exchangeRate;
-            const netRevenueDDP = revenueDDP * netRate;
+            const ddpFeesDDP = ddpPriceInput * settings.exchangeRate * feeAdRate;
+            const payoneerFeeDDP = revenueDDP * settings.payoneerRate;
+            const profitAmountDDP = revenueDDP * profitRate;
+            const netRevenueDDP = revenueDDP - payoneerFeeDDP - ddpFeesDDP - profitAmountDDP;
 
             let costDDP = netRevenueDDP;
             let shippingCostDDP = 0;
@@ -1989,9 +2024,8 @@
                 if (Math.abs(costDDP - prevCostDDP) < 1) break;
             }
 
-            // 参考利益
-            const feesDDP = revenueDDP * (settings.feeRate + settings.adRate + settings.payoneerRate);
-            const refProfitDDP = revenueDDP - feesDDP - costDDP - shippingCostDDP;
+            // 参考利益 - DDP価格ベースで手数料計算（既に計算済みの値を再利用）
+            const refProfitDDP = revenueDDP - payoneerFeeDDP - ddpFeesDDP - costDDP - shippingCostDDP;
 
             // DDU結果表示
             document.getElementById('result4-ddu').classList.remove('hidden');
