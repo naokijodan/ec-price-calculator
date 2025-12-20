@@ -805,6 +805,15 @@
                             <!-- 計算過程が動的に表示される -->
                         </div>
                     </div>
+                    <!-- シッピングポリシー判定 -->
+                    <div class="shipping-policy-box" id="policyBox1" style="margin-top: 15px; padding: 15px; background: #e3f2fd; border: 2px solid #2196f3; border-radius: 8px; display: none;">
+                        <h4 style="color: #1565c0; margin-bottom: 10px;">シッピングポリシー判定（V3対応）</h4>
+                        <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                            <span id="policyBadge1" style="display: inline-block; padding: 5px 12px; border-radius: 15px; font-weight: bold; font-size: 0.85em;"></span>
+                            <code id="policyName1" style="background: white; padding: 8px 12px; border-radius: 6px; font-size: 0.9em; flex-grow: 1; word-break: break-all;"></code>
+                            <button onclick="copyPolicyName('policyName1', this)" style="background: #2196f3; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85em;">コピー</button>
+                        </div>
+                    </div>
                     <!-- 利益計算の詳細 -->
                     <div class="profit-calc-box" style="margin-top: 15px; padding: 15px; background: #e8f5e9; border: 2px solid #4caf50; border-radius: 8px;">
                         <h4 style="color: #2e7d32; margin-bottom: 10px;">利益額の算出（検証用）</h4>
@@ -874,6 +883,15 @@
                             </div>
                         </div>
                         <div id="tariffCalcDetail2" class="formula" style="margin-top: 10px; background: #fffde7; font-size: 0.85em;">
+                        </div>
+                    </div>
+                    <!-- シッピングポリシー判定 -->
+                    <div class="shipping-policy-box" id="policyBox2" style="margin-top: 15px; padding: 15px; background: #e3f2fd; border: 2px solid #2196f3; border-radius: 8px; display: none;">
+                        <h4 style="color: #1565c0; margin-bottom: 10px;">シッピングポリシー判定（V3対応）</h4>
+                        <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                            <span id="policyBadge2" style="display: inline-block; padding: 5px 12px; border-radius: 15px; font-weight: bold; font-size: 0.85em;"></span>
+                            <code id="policyName2" style="background: white; padding: 8px 12px; border-radius: 6px; font-size: 0.9em; flex-grow: 1; word-break: break-all;"></code>
+                            <button onclick="copyPolicyName('policyName2', this)" style="background: #2196f3; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85em;">コピー</button>
                         </div>
                     </div>
                     <!-- 利益計算の詳細 -->
@@ -1148,6 +1166,210 @@
     </div>
 
     <script>
+        // ECOポリシーデータ（DDU価格下限-上限、関税額）
+        const ecoPolicies = [
+            { minDDU: 0, maxDDU: 7, tariff: 3 },
+            { minDDU: 7, maxDDU: 13, tariff: 4 },
+            { minDDU: 13, maxDDU: 20, tariff: 5 },
+            { minDDU: 20, maxDDU: 26, tariff: 6 },
+            { minDDU: 26, maxDDU: 33, tariff: 7 },
+            { minDDU: 33, maxDDU: 40, tariff: 8 },
+            { minDDU: 40, maxDDU: 46, tariff: 9 },
+            { minDDU: 46, maxDDU: 52, tariff: 10 },
+            { minDDU: 52, maxDDU: 59, tariff: 11 },
+            { minDDU: 59, maxDDU: 65, tariff: 12 },
+            { minDDU: 65, maxDDU: 72, tariff: 13 },
+            { minDDU: 72, maxDDU: 78, tariff: 14 },
+            { minDDU: 78, maxDDU: 85, tariff: 15 },
+            { minDDU: 85, maxDDU: 91, tariff: 16 },
+            { minDDU: 91, maxDDU: 97, tariff: 17 },
+            { minDDU: 97, maxDDU: 104, tariff: 18 },
+            { minDDU: 104, maxDDU: 110, tariff: 19 },
+            { minDDU: 110, maxDDU: 117, tariff: 20 },
+            { minDDU: 117, maxDDU: 130, tariff: 22 },
+            { minDDU: 130, maxDDU: 143, tariff: 24 },
+            { minDDU: 143, maxDDU: 150, tariff: 25 },
+            { minDDU: 150, maxDDU: 156, tariff: 26 },
+            { minDDU: 156, maxDDU: 169, tariff: 28 },
+            { minDDU: 169, maxDDU: 181, tariff: 30 },
+            { minDDU: 181, maxDDU: 194, tariff: 32 },
+            { minDDU: 194, maxDDU: 207, tariff: 34 },
+            { minDDU: 207, maxDDU: 214, tariff: 35 },
+            { minDDU: 214, maxDDU: 227, tariff: 37 },
+            { minDDU: 227, maxDDU: 246, tariff: 40 },
+            { minDDU: 246, maxDDU: 259, tariff: 42 },
+            { minDDU: 259, maxDDU: 278, tariff: 45 },
+            { minDDU: 278, maxDDU: 291, tariff: 47 },
+            { minDDU: 291, maxDDU: 311, tariff: 50 },
+            { minDDU: 311, maxDDU: 324, tariff: 52 },
+            { minDDU: 324, maxDDU: 343, tariff: 55 },
+            { minDDU: 343, maxDDU: 356, tariff: 57 },
+            { minDDU: 356, maxDDU: 375, tariff: 60 },
+            { minDDU: 375, maxDDU: 407, tariff: 65 },
+            { minDDU: 407, maxDDU: 440, tariff: 70 }
+        ];
+
+        // XPポリシーデータ（DDU価格下限-上限、関税額）
+        const xpPolicies = [
+            { minDDU: 0, maxDDU: 45, tariff: 7 },
+            { minDDU: 45, maxDDU: 52, tariff: 8 },
+            { minDDU: 52, maxDDU: 58, tariff: 9 },
+            { minDDU: 58, maxDDU: 65, tariff: 10 },
+            { minDDU: 65, maxDDU: 71, tariff: 11 },
+            { minDDU: 71, maxDDU: 78, tariff: 12 },
+            { minDDU: 78, maxDDU: 84, tariff: 13 },
+            { minDDU: 84, maxDDU: 90, tariff: 14 },
+            { minDDU: 90, maxDDU: 97, tariff: 15 },
+            { minDDU: 97, maxDDU: 103, tariff: 16 },
+            { minDDU: 103, maxDDU: 110, tariff: 17 },
+            { minDDU: 110, maxDDU: 116, tariff: 18 },
+            { minDDU: 116, maxDDU: 123, tariff: 19 },
+            { minDDU: 123, maxDDU: 129, tariff: 20 },
+            { minDDU: 129, maxDDU: 142, tariff: 22 },
+            { minDDU: 142, maxDDU: 155, tariff: 24 },
+            { minDDU: 155, maxDDU: 161, tariff: 25 },
+            { minDDU: 161, maxDDU: 168, tariff: 26 },
+            { minDDU: 168, maxDDU: 181, tariff: 28 },
+            { minDDU: 181, maxDDU: 194, tariff: 30 },
+            { minDDU: 194, maxDDU: 207, tariff: 32 },
+            { minDDU: 207, maxDDU: 220, tariff: 34 },
+            { minDDU: 220, maxDDU: 226, tariff: 35 },
+            { minDDU: 226, maxDDU: 239, tariff: 37 },
+            { minDDU: 239, maxDDU: 258, tariff: 40 },
+            { minDDU: 258, maxDDU: 271, tariff: 42 },
+            { minDDU: 271, maxDDU: 291, tariff: 45 },
+            { minDDU: 291, maxDDU: 304, tariff: 47 },
+            { minDDU: 304, maxDDU: 323, tariff: 50 },
+            { minDDU: 323, maxDDU: 336, tariff: 52 },
+            { minDDU: 336, maxDDU: 355, tariff: 55 },
+            { minDDU: 355, maxDDU: 368, tariff: 57 },
+            { minDDU: 368, maxDDU: 388, tariff: 60 },
+            { minDDU: 388, maxDDU: 420, tariff: 65 },
+            { minDDU: 420, maxDDU: 452, tariff: 70 },
+            { minDDU: 452, maxDDU: 484, tariff: 75 },
+            { minDDU: 484, maxDDU: 517, tariff: 80 },
+            { minDDU: 517, maxDDU: 549, tariff: 85 },
+            { minDDU: 549, maxDDU: 581, tariff: 90 },
+            { minDDU: 581, maxDDU: 614, tariff: 95 },
+            { minDDU: 614, maxDDU: 646, tariff: 100 },
+            { minDDU: 646, maxDDU: 678, tariff: 105 },
+            { minDDU: 678, maxDDU: 710, tariff: 110 },
+            { minDDU: 710, maxDDU: 743, tariff: 115 },
+            { minDDU: 743, maxDDU: 775, tariff: 120 },
+            { minDDU: 775, maxDDU: 807, tariff: 125 },
+            { minDDU: 807, maxDDU: 840, tariff: 130 },
+            { minDDU: 840, maxDDU: 872, tariff: 135 },
+            { minDDU: 872, maxDDU: 904, tariff: 140 },
+            { minDDU: 904, maxDDU: 937, tariff: 145 },
+            { minDDU: 937, maxDDU: 969, tariff: 150 },
+            { minDDU: 969, maxDDU: 1001, tariff: 155 },
+            { minDDU: 1001, maxDDU: 1033, tariff: 160 },
+            { minDDU: 1033, maxDDU: 1066, tariff: 165 },
+            { minDDU: 1066, maxDDU: 1098, tariff: 170 },
+            { minDDU: 1098, maxDDU: 1130, tariff: 175 },
+            { minDDU: 1130, maxDDU: 1163, tariff: 180 },
+            { minDDU: 1163, maxDDU: 1195, tariff: 185 },
+            { minDDU: 1195, maxDDU: 1227, tariff: 190 },
+            { minDDU: 1227, maxDDU: 1259, tariff: 195 },
+            { minDDU: 1259, maxDDU: 1292, tariff: 200 },
+            { minDDU: 1292, maxDDU: 1324, tariff: 205 },
+            { minDDU: 1324, maxDDU: 1356, tariff: 210 },
+            { minDDU: 1356, maxDDU: 1389, tariff: 215 },
+            { minDDU: 1389, maxDDU: 1421, tariff: 220 },
+            { minDDU: 1421, maxDDU: 1453, tariff: 225 },
+            { minDDU: 1453, maxDDU: 1486, tariff: 230 },
+            { minDDU: 1486, maxDDU: 1518, tariff: 235 },
+            { minDDU: 1518, maxDDU: 1550, tariff: 240 },
+            { minDDU: 1550, maxDDU: 1582, tariff: 245 },
+            { minDDU: 1582, maxDDU: 1615, tariff: 250 },
+            { minDDU: 1615, maxDDU: 1647, tariff: 255 },
+            { minDDU: 1647, maxDDU: 1679, tariff: 260 },
+            { minDDU: 1679, maxDDU: 1712, tariff: 265 },
+            { minDDU: 1712, maxDDU: 1744, tariff: 270 },
+            { minDDU: 1744, maxDDU: 1776, tariff: 275 },
+            { minDDU: 1776, maxDDU: 1808, tariff: 280 },
+            { minDDU: 1808, maxDDU: 1841, tariff: 285 },
+            { minDDU: 1841, maxDDU: 1873, tariff: 290 },
+            { minDDU: 1873, maxDDU: 1905, tariff: 295 },
+            { minDDU: 1905, maxDDU: 1938, tariff: 300 },
+            { minDDU: 1938, maxDDU: 1970, tariff: 305 },
+            { minDDU: 1970, maxDDU: 2002, tariff: 310 },
+            { minDDU: 2002, maxDDU: 2034, tariff: 315 },
+            { minDDU: 2034, maxDDU: 2067, tariff: 320 },
+            { minDDU: 2067, maxDDU: 2099, tariff: 325 },
+            { minDDU: 2099, maxDDU: 2131, tariff: 330 },
+            { minDDU: 2131, maxDDU: 2164, tariff: 335 },
+            { minDDU: 2164, maxDDU: 2196, tariff: 340 },
+            { minDDU: 2196, maxDDU: 2228, tariff: 345 },
+            { minDDU: 2228, maxDDU: 2261, tariff: 350 },
+            { minDDU: 2261, maxDDU: 2293, tariff: 355 },
+            { minDDU: 2293, maxDDU: 2325, tariff: 360 },
+            { minDDU: 2325, maxDDU: 2357, tariff: 365 },
+            { minDDU: 2357, maxDDU: 2390, tariff: 370 },
+            { minDDU: 2390, maxDDU: 2422, tariff: 375 },
+            { minDDU: 2422, maxDDU: 2454, tariff: 380 },
+            { minDDU: 2454, maxDDU: 2487, tariff: 385 },
+            { minDDU: 2487, maxDDU: 2519, tariff: 390 }
+        ];
+
+        // 関税額からポリシーを検索
+        function findPolicyByTariff(policies, estimatedTariff) {
+            for (let i = 0; i < policies.length; i++) {
+                const policy = policies[i];
+                const actualMin = (i === 0) ? 0 : policies[i - 1].tariff + 1;
+                const actualMax = policy.tariff;
+                if (estimatedTariff >= actualMin && estimatedTariff <= actualMax) {
+                    return policy;
+                }
+            }
+            return null;
+        }
+
+        // ポリシー名を生成
+        function generatePolicyName(policy, shippingMethod, condition) {
+            const minStr = String(policy.minDDU).padStart(4, '0');
+            const maxStr = String(policy.maxDDU).padStart(4, '0');
+            const tariffStr = String(policy.tariff).padStart(4, '0');
+            return `Egl_2511-${minStr}-${maxStr}_${shippingMethod}_${condition}_${tariffStr}`;
+        }
+
+        // シッピングポリシーを判定
+        function getShippingPolicy(sellingPriceUSD, adjustedTariffUSD, shippingMethod) {
+            const roundedTariff = Math.round(adjustedTariffUSD);
+            let policies, maxTariff, minTariff, methodCode;
+
+            if (shippingMethod === 'CE') {
+                policies = ecoPolicies;
+                maxTariff = 70;
+                minTariff = 3;
+                methodCode = 'eco';
+            } else if (shippingMethod === 'CX') {
+                policies = xpPolicies;
+                maxTariff = 390;
+                minTariff = 7;
+                methodCode = 'xp';
+            } else {
+                return { name: '-', badge: 'other', found: false };
+            }
+
+            const foundPolicy = findPolicyByTariff(policies, roundedTariff);
+
+            if (foundPolicy) {
+                return {
+                    name: generatePolicyName(foundPolicy, methodCode, 'new'),
+                    badge: methodCode,
+                    found: true,
+                    tariff: foundPolicy.tariff
+                };
+            } else if (roundedTariff > maxTariff) {
+                return { name: `範囲外（$${roundedTariff} > $${maxTariff}）`, badge: 'over', found: false };
+            } else if (roundedTariff < minTariff) {
+                return { name: `範囲外（$${roundedTariff} < $${minTariff}）`, badge: 'over', found: false };
+            } else {
+                return { name: `該当なし（$${roundedTariff}）`, badge: 'over', found: false };
+            }
+        }
+
         // 送料テーブルデータ（実際のShipping_Ratesシートから取得）
         const SHIPPING_RATE_TABLE = {
             EP: [ // eパケット
@@ -1875,6 +2097,57 @@
                 &nbsp;&nbsp;利益 = ¥${afterTariff.toFixed(0)} - ¥${costJPY.toFixed(0)} - ¥${shippingCostJPY.toFixed(0)}<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <strong style="color: #2e7d32; font-size: 1.2em;">¥${refProfit.toFixed(0)}</strong>
             `;
+
+            // シッピングポリシー判定
+            const policy1 = getShippingPolicy(sellingPriceUSD, tariffAmounts.adjustedTariff, effectiveMethod1);
+            displayShippingPolicy('policyBox1', 'policyBadge1', 'policyName1', policy1, effectiveMethod1);
+        }
+
+        // シッピングポリシー表示
+        function displayShippingPolicy(boxId, badgeId, nameId, policy, method) {
+            const box = document.getElementById(boxId);
+            const badge = document.getElementById(badgeId);
+            const name = document.getElementById(nameId);
+
+            // CE or CX のみ表示
+            if (method !== 'CE' && method !== 'CX') {
+                box.style.display = 'none';
+                return;
+            }
+
+            box.style.display = 'block';
+            name.textContent = policy.name;
+
+            // バッジスタイル
+            if (policy.badge === 'eco') {
+                badge.textContent = 'Cpassエコノミー';
+                badge.style.background = '#e8f5e9';
+                badge.style.color = '#2e7d32';
+            } else if (policy.badge === 'xp') {
+                badge.textContent = 'CpassFedEx';
+                badge.style.background = '#fff3e0';
+                badge.style.color = '#e65100';
+            } else {
+                badge.textContent = '範囲外';
+                badge.style.background = '#ffebee';
+                badge.style.color = '#c62828';
+            }
+        }
+
+        // ポリシー名コピー関数
+        function copyPolicyName(elementId, btn) {
+            const policyName = document.getElementById(elementId).textContent;
+            if (!policyName || policyName.includes('範囲外') || policyName.includes('該当なし')) return;
+
+            navigator.clipboard.writeText(policyName).then(() => {
+                const originalText = btn.textContent;
+                btn.textContent = 'コピー完了';
+                btn.style.background = '#4caf50';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#2196f3';
+                }, 1500);
+            });
         }
 
         // 計算2: 利益率で仕入れ→販売価格
@@ -2015,6 +2288,10 @@
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <strong style="color: #2e7d32; font-size: 1.2em;">¥${refProfit.toFixed(0)}</strong><br>
                 &nbsp;&nbsp;利益率 = 利益 ÷ DDP売上 = ¥${refProfit.toFixed(0)} ÷ ¥${ddpPriceJPY.toFixed(0)} = <strong>${profitRateActual}%</strong> （設定: ${profitRatePercent}%）
             `;
+
+            // シッピングポリシー判定
+            const policy2 = getShippingPolicy(sellingPriceUSD, tariffAmounts.adjustedTariff, effectiveMethod2);
+            displayShippingPolicy('policyBox2', 'policyBadge2', 'policyName2', policy2, effectiveMethod2);
         }
 
         // 計算3: 利益額で販売価格→仕入れ
