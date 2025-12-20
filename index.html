@@ -805,6 +805,13 @@
                             <!-- 計算過程が動的に表示される -->
                         </div>
                     </div>
+                    <!-- 利益計算の詳細 -->
+                    <div class="profit-calc-box" style="margin-top: 15px; padding: 15px; background: #e8f5e9; border: 2px solid #4caf50; border-radius: 8px;">
+                        <h4 style="color: #2e7d32; margin-bottom: 10px;">利益額の算出（検証用）</h4>
+                        <div id="profitCalcDetail1" class="formula" style="background: #f1f8e9; font-size: 0.85em; line-height: 1.8;">
+                            <!-- 利益計算過程が動的に表示される -->
+                        </div>
+                    </div>
                     <div class="formula" style="margin-top: 15px;">
                         <strong>計算式:</strong><br>
                         販売価格 = (仕入れ価格 + 送料 + 利益額) ÷ 為替レート ÷ (1 - 手数料率 - 広告費率 - ペイオニア率)<br>
@@ -867,6 +874,13 @@
                             </div>
                         </div>
                         <div id="tariffCalcDetail2" class="formula" style="margin-top: 10px; background: #fffde7; font-size: 0.85em;">
+                        </div>
+                    </div>
+                    <!-- 利益計算の詳細 -->
+                    <div class="profit-calc-box" style="margin-top: 15px; padding: 15px; background: #e8f5e9; border: 2px solid #4caf50; border-radius: 8px;">
+                        <h4 style="color: #2e7d32; margin-bottom: 10px;">利益額の算出（検証用）</h4>
+                        <div id="profitCalcDetail2" class="formula" style="background: #f1f8e9; font-size: 0.85em; line-height: 1.8;">
+                            <!-- 利益計算過程が動的に表示される -->
                         </div>
                     </div>
                     <div class="formula" style="margin-top: 15px;">
@@ -1801,6 +1815,35 @@
                 実際の関税額 = $${sellingPriceUSD.toFixed(2)} × ${tariffRatePercent}% × ... = <strong>$${tariffAmounts.actualTariff.toFixed(2)}</strong><br>
                 調整後関税額 = $${sellingPriceUSD.toFixed(2)} × ${adjustedTariffRatePercent}% × ... = <strong>$${tariffAmounts.adjustedTariff.toFixed(2)}</strong>
             `;
+
+            // 利益計算の詳細表示
+            const payoneerRatePercent = (settings.payoneerRate * 100).toFixed(1);
+            const revenueJPY = revenue;
+            const ebayFeeJPY = ddpPrice * settings.exchangeRate * settings.feeRate;
+            const adFeeJPY = ddpPrice * settings.exchangeRate * settings.adRate;
+            const payoneerFeeJPY = payoneerFee;
+            const totalFees = ebayFeeJPY + adFeeJPY + payoneerFeeJPY;
+
+            document.getElementById('profitCalcDetail1').innerHTML = `
+                <strong>【利益計算の詳細】</strong><br><br>
+                <strong>① 売上（円換算）</strong><br>
+                &nbsp;&nbsp;販売価格（DDU）× 為替 = $${sellingPriceUSD.toFixed(2)} × ¥${settings.exchangeRate.toFixed(2)} = <strong>¥${revenueJPY.toFixed(0)}</strong><br><br>
+                <strong>② 手数料（DDP価格ベース）</strong><br>
+                &nbsp;&nbsp;eBay手数料 = DDP価格 × 為替 × ${feeRatePercent}%<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= $${ddpPrice.toFixed(2)} × ¥${settings.exchangeRate.toFixed(2)} × ${feeRatePercent}% = <strong>¥${ebayFeeJPY.toFixed(0)}</strong><br>
+                &nbsp;&nbsp;広告費 = DDP価格 × 為替 × ${adRatePercent}%<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= $${ddpPrice.toFixed(2)} × ¥${settings.exchangeRate.toFixed(2)} × ${adRatePercent}% = <strong>¥${adFeeJPY.toFixed(0)}</strong><br>
+                &nbsp;&nbsp;ペイオニア = 売上 × ${payoneerRatePercent}%<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= ¥${revenueJPY.toFixed(0)} × ${payoneerRatePercent}% = <strong>¥${payoneerFeeJPY.toFixed(0)}</strong><br>
+                &nbsp;&nbsp;手数料合計 = ¥${ebayFeeJPY.toFixed(0)} + ¥${adFeeJPY.toFixed(0)} + ¥${payoneerFeeJPY.toFixed(0)} = <strong>¥${totalFees.toFixed(0)}</strong><br><br>
+                <strong>③ 原価</strong><br>
+                &nbsp;&nbsp;仕入れ価格 = <strong>¥${costJPY.toFixed(0)}</strong><br>
+                &nbsp;&nbsp;送料 = <strong>¥${shippingCostJPY.toFixed(0)}</strong><br><br>
+                <strong>④ 利益額</strong><br>
+                &nbsp;&nbsp;利益 = 売上 - 手数料合計 - 仕入れ - 送料<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= ¥${revenueJPY.toFixed(0)} - ¥${totalFees.toFixed(0)} - ¥${costJPY.toFixed(0)} - ¥${shippingCostJPY.toFixed(0)}<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <strong style="color: #2e7d32; font-size: 1.2em;">¥${refProfit.toFixed(0)}</strong>
+            `;
         }
 
         // 計算2: 利益率で仕入れ→販売価格
@@ -1874,6 +1917,38 @@
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <strong>${adjustedTariffRatePercent}%</strong><br><br>
                 実際の関税額 = $${sellingPriceUSD.toFixed(2)} × ${tariffRatePercent}% × ... = <strong>$${tariffAmounts.actualTariff.toFixed(2)}</strong><br>
                 調整後関税額 = $${sellingPriceUSD.toFixed(2)} × ${adjustedTariffRatePercent}% × ... = <strong>$${tariffAmounts.adjustedTariff.toFixed(2)}</strong>
+            `;
+
+            // 利益計算の詳細表示
+            const payoneerRatePercent = (settings.payoneerRate * 100).toFixed(1);
+            const profitRatePercent = (profitRate * 100).toFixed(1);
+            const revenueJPY = revenue;
+            const ebayFeeJPY = ddpPrice * settings.exchangeRate * settings.feeRate;
+            const adFeeJPY = ddpPrice * settings.exchangeRate * settings.adRate;
+            const payoneerFeeJPY = payoneerFee;
+            const totalFees = ebayFeeJPY + adFeeJPY + payoneerFeeJPY;
+            const profitRateActual = (refProfit / revenueJPY * 100).toFixed(1);
+
+            document.getElementById('profitCalcDetail2').innerHTML = `
+                <strong>【利益計算の詳細】</strong><br><br>
+                <strong>① 売上（円換算）</strong><br>
+                &nbsp;&nbsp;販売価格（DDU）× 為替 = $${sellingPriceUSD.toFixed(2)} × ¥${settings.exchangeRate.toFixed(2)} = <strong>¥${revenueJPY.toFixed(0)}</strong><br><br>
+                <strong>② 手数料（DDP価格ベース）</strong><br>
+                &nbsp;&nbsp;eBay手数料 = DDP価格 × 為替 × ${feeRatePercent}%<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= $${ddpPrice.toFixed(2)} × ¥${settings.exchangeRate.toFixed(2)} × ${feeRatePercent}% = <strong>¥${ebayFeeJPY.toFixed(0)}</strong><br>
+                &nbsp;&nbsp;広告費 = DDP価格 × 為替 × ${adRatePercent}%<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= $${ddpPrice.toFixed(2)} × ¥${settings.exchangeRate.toFixed(2)} × ${adRatePercent}% = <strong>¥${adFeeJPY.toFixed(0)}</strong><br>
+                &nbsp;&nbsp;ペイオニア = 売上 × ${payoneerRatePercent}%<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= ¥${revenueJPY.toFixed(0)} × ${payoneerRatePercent}% = <strong>¥${payoneerFeeJPY.toFixed(0)}</strong><br>
+                &nbsp;&nbsp;手数料合計 = ¥${ebayFeeJPY.toFixed(0)} + ¥${adFeeJPY.toFixed(0)} + ¥${payoneerFeeJPY.toFixed(0)} = <strong>¥${totalFees.toFixed(0)}</strong><br><br>
+                <strong>③ 原価</strong><br>
+                &nbsp;&nbsp;仕入れ価格 = <strong>¥${costJPY.toFixed(0)}</strong><br>
+                &nbsp;&nbsp;送料 = <strong>¥${shippingCostJPY.toFixed(0)}</strong><br><br>
+                <strong>④ 利益額・利益率</strong><br>
+                &nbsp;&nbsp;利益 = 売上 - 手数料合計 - 仕入れ - 送料<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= ¥${revenueJPY.toFixed(0)} - ¥${totalFees.toFixed(0)} - ¥${costJPY.toFixed(0)} - ¥${shippingCostJPY.toFixed(0)}<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <strong style="color: #2e7d32; font-size: 1.2em;">¥${refProfit.toFixed(0)}</strong><br>
+                &nbsp;&nbsp;利益率 = 利益 ÷ 売上 = ¥${refProfit.toFixed(0)} ÷ ¥${revenueJPY.toFixed(0)} = <strong>${profitRateActual}%</strong> （設定: ${profitRatePercent}%）
             `;
         }
 
