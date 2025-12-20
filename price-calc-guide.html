@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>価格計算ツール 使い方ガイド</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+            line-height: 1.8;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.2em;
+            margin-bottom: 0;
+            font-weight: 700;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section h2 {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #e8f0fe;
+        }
+
+        .section h3 {
+            color: #333;
+            font-size: 1.4em;
+            margin: 30px 0 15px 0;
+            padding-left: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .section p {
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            line-height: 1.9;
+        }
+
+        .big-text {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 20px 0;
+        }
+
+        .highlight-box {
+            background: #e8f0fe;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .simple-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .video-container {
+            margin: 30px 0;
+            padding: 15px;
+            background: #fff;
+            border-radius: 8px;
+            border: 2px solid #667eea;
+        }
+
+        .video-title {
+            margin: 0 0 15px 0;
+            text-align: center;
+            color: #666;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .video-placeholder {
+            background: #f0f0f0;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            border-radius: 8px;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 35px;
+            height: 35px;
+            line-height: 35px;
+            text-align: center;
+            border-radius: 50%;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .pattern-card {
+            background: white;
+            border: 3px solid #667eea;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+
+        .pattern-card h4 {
+            color: #667eea;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+        }
+
+        .pattern-card .example {
+            background: #fff9e6;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin-top: 15px;
+            border-radius: 5px;
+            font-size: 1.05em;
+        }
+
+        .settings-simple {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .settings-simple p {
+            margin: 10px 0;
+            font-size: 1.05em;
+        }
+
+        .settings-simple strong {
+            color: #667eea;
+        }
+
+        footer {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            color: #6c757d;
+            border-top: 1px solid #dee2e6;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            header h1 {
+                font-size: 1.6em;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .section h2 {
+                font-size: 1.4em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💰 価格計算ツール 使い方ガイド</h1>
+        </header>
+
+        <div class="content">
+            <!-- セクション1: これは何？ -->
+            <section class="section">
+                <h2>📖 これは何？</h2>
+
+                <p class="big-text">
+                    eBayで商品を売るときの<strong>「いくらで売ればいいか」</strong>を計算してくれるツールです。
+                </p>
+
+                <p>
+                    手数料や送料、関税など、面倒な計算を<strong>自動でやってくれます</strong>。<br>
+                    ブラウザで開くだけで使えます。
+                </p>
+            </section>
+
+            <!-- セクション2: ツールを開く -->
+            <section class="section">
+                <h2>🚀 ツールを開く（2つの方法）</h2>
+
+                <div class="highlight-box">
+                    <p style="font-size: 1.2em; line-height: 2;">
+                        <strong>1. リンクから開く</strong><br>
+                    </p>
+                    <div style="text-align: center; margin: 20px 0;">
+                        <a href="https://naokijodan.github.io/ec-price-calculator/"
+                           target="_blank"
+                           style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 40px; border-radius: 10px; text-decoration: none; font-size: 1.2em; font-weight: bold; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); transition: all 0.3s;">
+                            🔗 価格計算ツールを開く
+                        </a>
+                    </div>
+                    <p style="font-size: 1.2em; line-height: 2; margin-top: 30px;">
+                        <strong>2. 一括シートのメニューから開く</strong><br>
+                        一括シート → メニュー「価格計算」 → 「価格計算ツールを開く」
+                    </p>
+                </div>
+
+                <div class="video-container">
+                    <p class="video-title">📹 <strong>動画：ツールを開く方法</strong></p>
+                    <div style="padding:64.95% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/1139290400?h=f8198fc787&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="価格計算ツールの開き方2025-11-21 21.23.32"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
+                </div>
+
+                <div class="simple-box" style="background: #e8f5e9; border-left: 4px solid #4caf50;">
+                    <p style="font-size: 1.1em; margin: 0; line-height: 1.9;">
+                        📱 <strong>スマホでも使えます！</strong><br><br>
+                        このリンクをスマホで開けば、外出先でも計算できます。<br>
+                        <strong>例えば...</strong><br>
+                        • お客様からのオファーに、その場で返信したい時<br>
+                        • お店で良い商品を見つけて、利益が出るか確認したい時<br>
+                        • カフェで仕入れ判断をしたい時<br><br>
+                        いつでも、どこでも使えるので便利です！
+                    </p>
+                </div>
+            </section>
+
+            <!-- セクション3: 最初にやること -->
+            <section class="section">
+                <h2>⚙️ 最初にやること（共通設定）</h2>
+
+                <p class="big-text">
+                    ツールを開いたら、まず<strong>「共通設定」</strong>を入力します。
+                </p>
+
+                <h3>📋 入力する項目</h3>
+
+                <div class="settings-simple">
+                    <p><strong>為替レート</strong> → 1ドル＝何円か（例：153円）</p>
+                    <p><strong>手数料率</strong> → eBayの手数料（例：18%）</p>
+                    <p><strong>広告費率</strong> → 広告にかける費用（例：10%）</p>
+                    <p><strong>ペイオニア手数料</strong> → 決済手数料（例：2%）</p>
+                    <p><strong>送料</strong> → 商品を送る送料（例：3000円）</p>
+                </div>
+
+                <div class="video-container">
+                    <p class="video-title">📹 <strong>動画：共通設定の入力方法</strong></p>
+                    <div style="padding:64.95% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/1139293722?h=c434480ebc&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="共通設定方法2025-11-21 21.31.57"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
+                </div>
+
+                <div class="simple-box">
+                    <p style="font-size: 1.1em; margin: 0;">
+                        💡 <strong>一度入力すれば、次回からはそのまま使えます。</strong><br>
+                        分からない項目は、とりあえずそのままでOKです。
+                    </p>
+                </div>
+            </section>
+
+            <!-- セクション4: 4つの使い方 -->
+            <section class="section">
+                <h2>🧮 4つの使い方</h2>
+
+                <p class="big-text">
+                    このツールには<strong>4つの計算方法</strong>があります。<br>
+                    やりたいことに合わせて選びましょう。
+                </p>
+
+                <!-- パターン1 -->
+                <div class="pattern-card">
+                    <h4>① 仕入れ値から売値を計算（利益額）</h4>
+                    <p style="font-size: 1.1em;">
+                        <strong>こんな時に使う：</strong><br>
+                        「5000円で仕入れた。1000円の利益が欲しい。いくらで売る？」
+                    </p>
+                    <div class="example">
+                        <strong>例：</strong><br>
+                        仕入れ値 5000円、利益 1000円 → <strong>販売価格を自動計算</strong>
+                    </div>
+                </div>
+
+                <!-- パターン2 -->
+                <div class="pattern-card">
+                    <h4>② 仕入れ値から売値を計算（利益率）</h4>
+                    <p style="font-size: 1.1em;">
+                        <strong>こんな時に使う：</strong><br>
+                        「10000円で仕入れた。20%の利益率で売りたい。いくらで売る？」
+                    </p>
+                    <div class="example">
+                        <strong>例：</strong><br>
+                        仕入れ値 10000円、利益率 20% → <strong>販売価格を自動計算</strong>
+                    </div>
+                </div>
+
+                <div class="video-container">
+                    <p class="video-title">📹 <strong>動画：販売価格の算出方法</strong></p>
+                    <div style="padding:64.95% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/1139293722?h=c434480ebc&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="共通設定方法2025-11-21 21.31.57"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
+                </div>
+
+                <!-- パターン3 -->
+                <div class="pattern-card">
+                    <h4>③ 売値から仕入れ値を計算（利益額）</h4>
+                    <p style="font-size: 1.1em;">
+                        <strong>こんな時に使う：</strong><br>
+                        「100ドルで売りたい。1000円の利益を取るなら、いくらまで仕入れられる？」
+                    </p>
+                    <div class="example">
+                        <strong>例：</strong><br>
+                        販売価格 100ドル、利益 1000円 → <strong>仕入れ可能な金額を自動計算</strong>
+                    </div>
+                </div>
+
+                <!-- パターン4 -->
+                <div class="pattern-card">
+                    <h4>④ 売値から仕入れ値を計算（利益率）</h4>
+                    <p style="font-size: 1.1em;">
+                        <strong>こんな時に使う：</strong><br>
+                        「500ドルで売りたい。15%の利益率なら、いくらまで仕入れられる？」
+                    </p>
+                    <div class="example">
+                        <strong>例：</strong><br>
+                        販売価格 500ドル、利益率 15% → <strong>仕入れ可能な金額を自動計算</strong>
+                    </div>
+                </div>
+
+                <div class="video-container">
+                    <p class="video-title">📹 <strong>動画：仕入れ価格の算出方法</strong></p>
+                    <div style="padding:64.95% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/1139297013?h=b082397f91&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="仕入れ価格の算出方法 2025-11-21 21.42.23"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
+                </div>
+            </section>
+
+            <!-- セクション5: 計算してみよう -->
+            <section class="section">
+                <h2>🎬 実際に計算してみよう</h2>
+
+                <div class="highlight-box">
+                    <h3 style="margin-top: 0;">📝 計算の手順</h3>
+                    <p style="font-size: 1.15em; line-height: 2.2;">
+                        <span class="step-number">1</span> 共通設定を入力する<br><br>
+                        <span class="step-number">2</span> 4つの中から使いたい計算を選ぶ<br><br>
+                        <span class="step-number">3</span> 必要な数字を入力する<br><br>
+                        <span class="step-number">4</span> 「計算する」ボタンを押す<br><br>
+                        <span class="step-number">5</span> 結果を見る
+                    </p>
+                </div>
+
+                <div class="video-container">
+                    <p class="video-title">📹 <strong>動画：実際の計算手順</strong></p>
+                    <div style="padding:64.95% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/1139299197?h=c3dbb25175&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="実際の使用方法お2025-11-21 21.49.15"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
+                </div>
+            </section>
+
+            <!-- セクション6: まとめ -->
+            <section class="section">
+                <h2>✅ まとめ</h2>
+
+                <div class="highlight-box">
+                    <p style="font-size: 1.2em; line-height: 2; margin: 0;">
+                        <strong>① ツールを開く</strong><br>
+                        リンクをクリック、または一括シートのメニューから<br><br>
+
+                        <strong>② 共通設定を入力</strong><br>
+                        為替レート、手数料、送料など<br><br>
+
+                        <strong>③ 計算方法を選ぶ</strong><br>
+                        4つの中から状況に合わせて選ぶ<br><br>
+
+                        <strong>④ 数字を入れて計算</strong><br>
+                        ボタンを押すだけ！
+                    </p>
+                </div>
+
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="https://naokijodan.github.io/ec-price-calculator/"
+                       target="_blank"
+                       style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 40px; border-radius: 10px; text-decoration: none; font-size: 1.2em; font-weight: bold; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+                        🔗 今すぐツールを開く
+                    </a>
+                </div>
+            </section>
+        </div>
+
+        <footer>
+            <p><strong>価格計算ツール 使い方ガイド</strong></p>
+            <p>最終更新日: 2025年11月21日</p>
+        </footer>
+    </div>
+</body>
+</html>

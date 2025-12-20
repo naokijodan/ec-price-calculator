@@ -582,10 +582,14 @@
                         <option value="table">テーブル計算</option>
                     </select>
                 </div>
-                <!-- 2段目：関税率、VAT率、関税処理手数料率、米国通関処理手数料、MPF、EU送料差額 -->
+                <!-- 2段目：関税率、安全係数、VAT率、関税処理手数料率、米国通関処理手数料、MPF、EU送料差額 -->
                 <div class="input-group">
                     <label>関税率 (%)</label>
                     <input type="number" id="tariffRate" value="15" step="0.1">
+                </div>
+                <div class="input-group">
+                    <label>安全係数 (%) <span style="font-size: 0.75em; color: #28a745;">※V3対応</span></label>
+                    <input type="number" id="safetyMargin" value="3" step="0.1" title="端数・為替変動対策（推奨: 3%）">
                 </div>
                 <div class="input-group">
                     <label>VAT率 (%)</label>
@@ -764,15 +768,11 @@
                     <h3>計算結果</h3>
                     <div class="result-grid">
                         <div class="result-item highlight">
-                            <label>販売価格（ドル）</label>
+                            <label>販売価格（DDU）</label>
                             <div class="value" id="sellingPrice1">-</div>
                         </div>
-                        <div class="result-item">
-                            <label>想定関税（ドル）</label>
-                            <div class="value" id="tariff1">-</div>
-                        </div>
                         <div class="result-item highlight">
-                            <label>DDP価格（ドル）</label>
+                            <label>DDP価格</label>
                             <div class="value" id="ddpPrice1">-</div>
                         </div>
                         <div class="result-item">
@@ -784,12 +784,33 @@
                             <div class="value" id="refProfit1">-</div>
                         </div>
                     </div>
-                    <div class="formula">
+                    <!-- 関税額の比較 -->
+                    <div class="tariff-comparison-box" style="margin-top: 15px; padding: 15px; background: #fff8e1; border: 2px solid #ffc107; border-radius: 8px;">
+                        <h4 style="color: #f57c00; margin-bottom: 10px;">関税額の比較（V3調整関税対応）</h4>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center;">
+                            <div style="background: white; padding: 10px; border-radius: 6px;">
+                                <label style="font-size: 0.8em; color: #666;">実際の関税額</label>
+                                <div class="value" id="actualTariff1" style="color: #e91e63;">-</div>
+                            </div>
+                            <div style="background: white; padding: 10px; border-radius: 6px;">
+                                <label style="font-size: 0.8em; color: #666;">調整後の関税額</label>
+                                <div class="value" id="adjustedTariff1" style="color: #4caf50;">-</div>
+                            </div>
+                            <div style="background: white; padding: 10px; border-radius: 6px;">
+                                <label style="font-size: 0.8em; color: #666;">差額（手数料補填）</label>
+                                <div class="value" id="tariffDiff1" style="color: #ff9800;">-</div>
+                            </div>
+                        </div>
+                        <div id="tariffCalcDetail1" class="formula" style="margin-top: 10px; background: #fffde7; font-size: 0.85em;">
+                            <!-- 計算過程が動的に表示される -->
+                        </div>
+                    </div>
+                    <div class="formula" style="margin-top: 15px;">
                         <strong>計算式:</strong><br>
                         販売価格 = (仕入れ価格 + 送料 + 利益額) ÷ 為替レート ÷ (1 - 手数料率 - 広告費率 - ペイオニア率)<br>
-                        想定関税 = 販売価格 × 関税率 × (1 + 通関処理手数料率) + 販売価格 × VAT率 × 通関処理手数料率 + (通関手数料円 ÷ 為替) + MPF($) + (EU送料差額円 ÷ 為替)<br>
-                        <small style="color: #6c757d;">※通関手数料: CFは現状0、CEは296円、直契約は別途</small><br>
-                        DDP価格 = 販売価格 + 想定関税
+                        調整関税率 = 実際の関税率 ÷ (1 - 手数料率 - 広告率) × (1 + 安全係数)<br>
+                        調整後関税額 = 販売価格 × 調整関税率 × (1 + 通関処理手数料率) + ...<br>
+                        DDP価格 = 販売価格 + 調整後関税額
                     </div>
                 </div>
             </div>
@@ -812,15 +833,11 @@
                     <h3>計算結果</h3>
                     <div class="result-grid">
                         <div class="result-item highlight">
-                            <label>販売価格（ドル）</label>
+                            <label>販売価格（DDU）</label>
                             <div class="value" id="sellingPrice2">-</div>
                         </div>
-                        <div class="result-item">
-                            <label>想定関税（ドル）</label>
-                            <div class="value" id="tariff2">-</div>
-                        </div>
                         <div class="result-item highlight">
-                            <label>DDP価格（ドル）</label>
+                            <label>DDP価格</label>
                             <div class="value" id="ddpPrice2">-</div>
                         </div>
                         <div class="result-item">
@@ -832,12 +849,31 @@
                             <div class="value" id="refProfit2">-</div>
                         </div>
                     </div>
-                    <div class="formula">
+                    <!-- 関税額の比較 -->
+                    <div class="tariff-comparison-box" style="margin-top: 15px; padding: 15px; background: #fff8e1; border: 2px solid #ffc107; border-radius: 8px;">
+                        <h4 style="color: #f57c00; margin-bottom: 10px;">関税額の比較（V3調整関税対応）</h4>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center;">
+                            <div style="background: white; padding: 10px; border-radius: 6px;">
+                                <label style="font-size: 0.8em; color: #666;">実際の関税額</label>
+                                <div class="value" id="actualTariff2" style="color: #e91e63;">-</div>
+                            </div>
+                            <div style="background: white; padding: 10px; border-radius: 6px;">
+                                <label style="font-size: 0.8em; color: #666;">調整後の関税額</label>
+                                <div class="value" id="adjustedTariff2" style="color: #4caf50;">-</div>
+                            </div>
+                            <div style="background: white; padding: 10px; border-radius: 6px;">
+                                <label style="font-size: 0.8em; color: #666;">差額（手数料補填）</label>
+                                <div class="value" id="tariffDiff2" style="color: #ff9800;">-</div>
+                            </div>
+                        </div>
+                        <div id="tariffCalcDetail2" class="formula" style="margin-top: 10px; background: #fffde7; font-size: 0.85em;">
+                        </div>
+                    </div>
+                    <div class="formula" style="margin-top: 15px;">
                         <strong>計算式:</strong><br>
                         販売価格 = (仕入れ価格 + 送料) ÷ 為替レート ÷ (1 - 利益率 - 手数料率 - 広告費率 - ペイオニア率)<br>
-                        想定関税 = 販売価格 × 関税率 × (1 + 通関処理手数料率) + 販売価格 × VAT率 × 通関処理手数料率 + (通関手数料円 ÷ 為替) + MPF($) + (EU送料差額円 ÷ 為替)<br>
-                        <small style="color: #6c757d;">※通関手数料: CFは現状0、CEは296円、直契約は別途</small><br>
-                        DDP価格 = 販売価格 + 想定関税
+                        調整関税率 = 実際の関税率 ÷ (1 - 手数料率 - 広告率) × (1 + 安全係数)<br>
+                        DDP価格 = 販売価格 + 調整後関税額
                     </div>
                 </div>
             </div>
@@ -1547,6 +1583,7 @@
             return {
                 exchangeRate: parseFloat(document.getElementById('exchangeRate').value),
                 tariffRate: parseFloat(document.getElementById('tariffRate').value) / 100,
+                safetyMargin: parseFloat(document.getElementById('safetyMargin').value) / 100,
                 vatRate: parseFloat(document.getElementById('vatRate').value) / 100,
                 processingFeeRate: parseFloat(document.getElementById('processingFeeRate').value) / 100,
                 mpf: parseFloat(document.getElementById('mpf').value),
@@ -1570,6 +1607,43 @@
             };
         }
 
+        // 調整関税率を計算
+        // 調整関税率 = 実際の関税率 ÷ (1 - 手数料率 - 広告率) × (1 + 安全係数)
+        function calculateAdjustedTariffRate(settings) {
+            const denominator = 1 - settings.feeRate - settings.adRate;
+            if (denominator <= 0) return settings.tariffRate;
+            return (settings.tariffRate / denominator) * (1 + settings.safetyMargin);
+        }
+
+        // 関税額を計算（実際の関税額と調整後の関税額を両方返す）
+        function calculateTariffAmounts(sellingPriceUSD, settings, effectiveMethod) {
+            const customsFeeJPY = (effectiveMethod === 'CE') ? settings.ceMpf : 0;
+
+            // 実際の関税額（従来の計算）
+            const actualTariff = sellingPriceUSD * settings.tariffRate * (1 + settings.processingFeeRate)
+                               + sellingPriceUSD * settings.vatRate * settings.processingFeeRate
+                               + (customsFeeJPY / settings.exchangeRate)
+                               + settings.mpfUsd
+                               + (settings.euShippingDiff / settings.exchangeRate);
+
+            // 調整関税率
+            const adjustedTariffRate = calculateAdjustedTariffRate(settings);
+
+            // 調整後の関税額
+            const adjustedTariff = sellingPriceUSD * adjustedTariffRate * (1 + settings.processingFeeRate)
+                                 + sellingPriceUSD * settings.vatRate * settings.processingFeeRate
+                                 + (customsFeeJPY / settings.exchangeRate)
+                                 + settings.mpfUsd
+                                 + (settings.euShippingDiff / settings.exchangeRate);
+
+            return {
+                actualTariff: actualTariff,
+                adjustedTariff: adjustedTariff,
+                difference: adjustedTariff - actualTariff,
+                adjustedTariffRate: adjustedTariffRate
+            };
+        }
+
         // 設定を保存
         function saveSettings() {
             const settings = getSettings();
@@ -1584,6 +1658,9 @@
                 const settings = JSON.parse(saved);
                 document.getElementById('exchangeRate').value = settings.exchangeRate;
                 document.getElementById('tariffRate').value = settings.tariffRate * 100;
+                if (settings.safetyMargin !== undefined) {
+                    document.getElementById('safetyMargin').value = settings.safetyMargin * 100;
+                }
                 if (settings.vatRate !== undefined) {
                     document.getElementById('vatRate').value = settings.vatRate * 100;
                 }
@@ -1680,23 +1757,17 @@
             const netRate = (1 - settings.payoneerRate) - tariffMultiplier * feeAdRate;
             let sellingPriceUSD = totalCostJPY / settings.exchangeRate / netRate;
 
-            // 想定関税 = 関税額 + 関税処理手数料 + (通関手数料円 ÷ 為替) + MPF$ + (EU送料差額円 ÷ 為替)
-            // 関税額 = 販売価格 × 関税率
-            // 関税処理手数料 = (販売価格 × 関税率 × 関税処理手数料率) + (販売価格 × VAT率 × 関税処理手数料率)
-            // CE（Cpass-Economy）の場合のみceMpfを適用、それ以外のクーリエは0
+            // 配送方法判定
             const effectiveMethod1 = getEffectiveShippingMethod(
                 costJPY, settings.actualWeight, settings.shippingMethod,
                 settings.shippingThreshold, settings.lowPriceMethod, settings.highPriceMethod
             );
-            const customsFeeJPY1 = (effectiveMethod1 === 'CE') ? settings.ceMpf : 0;
-            let tariffUSD = sellingPriceUSD * settings.tariffRate * (1 + settings.processingFeeRate)
-                          + sellingPriceUSD * settings.vatRate * settings.processingFeeRate
-                          + (customsFeeJPY1 / settings.exchangeRate)
-                          + settings.mpfUsd
-                          + (settings.euShippingDiff / settings.exchangeRate);
 
-            // DDP価格 = 販売価格 + 想定関税
-            const ddpPrice = sellingPriceUSD + tariffUSD;
+            // 関税額を計算（実際と調整後）
+            const tariffAmounts = calculateTariffAmounts(sellingPriceUSD, settings, effectiveMethod1);
+
+            // DDP価格 = 販売価格 + 調整後関税額
+            const ddpPrice = sellingPriceUSD + tariffAmounts.adjustedTariff;
 
             // 参考利益（再計算）- DDP価格ベースで手数料計算
             const revenue = sellingPriceUSD * settings.exchangeRate;
@@ -1707,10 +1778,29 @@
             // 結果表示
             document.getElementById('result1').classList.remove('hidden');
             document.getElementById('sellingPrice1').textContent = `$${sellingPriceUSD.toFixed(2)}`;
-            document.getElementById('tariff1').textContent = `$${tariffUSD.toFixed(2)}`;
             document.getElementById('ddpPrice1').textContent = `$${ddpPrice.toFixed(2)}`;
             document.getElementById('refProfit1').textContent = `¥${refProfit.toFixed(0)}`;
             document.getElementById('shipping1').textContent = `¥${shippingCostJPY.toFixed(0)} (${getShippingMethodDisplayName(effectiveMethod1)})`;
+
+            // 関税額の比較表示
+            document.getElementById('actualTariff1').textContent = `$${tariffAmounts.actualTariff.toFixed(2)}`;
+            document.getElementById('adjustedTariff1').textContent = `$${tariffAmounts.adjustedTariff.toFixed(2)}`;
+            document.getElementById('tariffDiff1').textContent = `+$${tariffAmounts.difference.toFixed(2)}`;
+
+            // 計算過程の詳細表示
+            const tariffRatePercent = (settings.tariffRate * 100).toFixed(1);
+            const feeRatePercent = (settings.feeRate * 100).toFixed(1);
+            const adRatePercent = (settings.adRate * 100).toFixed(1);
+            const safetyMarginPercent = (settings.safetyMargin * 100).toFixed(1);
+            const adjustedTariffRatePercent = (tariffAmounts.adjustedTariffRate * 100).toFixed(2);
+
+            document.getElementById('tariffCalcDetail1').innerHTML = `
+                <strong>【計算過程】</strong><br>
+                調整関税率 = ${tariffRatePercent}% ÷ (1 - ${feeRatePercent}% - ${adRatePercent}%) × (1 + ${safetyMarginPercent}%)<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <strong>${adjustedTariffRatePercent}%</strong><br><br>
+                実際の関税額 = $${sellingPriceUSD.toFixed(2)} × ${tariffRatePercent}% × ... = <strong>$${tariffAmounts.actualTariff.toFixed(2)}</strong><br>
+                調整後関税額 = $${sellingPriceUSD.toFixed(2)} × ${adjustedTariffRatePercent}% × ... = <strong>$${tariffAmounts.adjustedTariff.toFixed(2)}</strong>
+            `;
         }
 
         // 計算2: 利益率で仕入れ→販売価格
@@ -1742,23 +1832,17 @@
             const netRate = (1 - settings.payoneerRate) - tariffMultiplier * feeAdRate - profitRate;
             let sellingPriceUSD = baseCost / settings.exchangeRate / netRate;
 
-            // 想定関税 = 関税額 + 関税処理手数料 + (通関手数料円 ÷ 為替) + MPF$ + (EU送料差額円 ÷ 為替)
-            // 関税額 = 販売価格 × 関税率
-            // 関税処理手数料 = (販売価格 × 関税率 × 関税処理手数料率) + (販売価格 × VAT率 × 関税処理手数料率)
-            // CE（Cpass-Economy）の場合のみceMpfを適用、それ以外のクーリエは0
+            // 配送方法判定
             const effectiveMethod2 = getEffectiveShippingMethod(
                 costJPY, settings.actualWeight, settings.shippingMethod,
                 settings.shippingThreshold, settings.lowPriceMethod, settings.highPriceMethod
             );
-            const customsFeeJPY2 = (effectiveMethod2 === 'CE') ? settings.ceMpf : 0;
-            let tariffUSD = sellingPriceUSD * settings.tariffRate * (1 + settings.processingFeeRate)
-                          + sellingPriceUSD * settings.vatRate * settings.processingFeeRate
-                          + (customsFeeJPY2 / settings.exchangeRate)
-                          + settings.mpfUsd
-                          + (settings.euShippingDiff / settings.exchangeRate);
 
-            // DDP価格 = 販売価格 + 想定関税
-            const ddpPrice = sellingPriceUSD + tariffUSD;
+            // 関税額を計算（実際と調整後）
+            const tariffAmounts = calculateTariffAmounts(sellingPriceUSD, settings, effectiveMethod2);
+
+            // DDP価格 = 販売価格 + 調整後関税額
+            const ddpPrice = sellingPriceUSD + tariffAmounts.adjustedTariff;
 
             // 参考利益 - DDP価格ベースで手数料計算
             const revenue = sellingPriceUSD * settings.exchangeRate;
@@ -1768,10 +1852,29 @@
 
             document.getElementById('result2').classList.remove('hidden');
             document.getElementById('sellingPrice2').textContent = `$${sellingPriceUSD.toFixed(2)}`;
-            document.getElementById('tariff2').textContent = `$${tariffUSD.toFixed(2)}`;
             document.getElementById('ddpPrice2').textContent = `$${ddpPrice.toFixed(2)}`;
             document.getElementById('refProfit2').textContent = `¥${refProfit.toFixed(0)}`;
             document.getElementById('shipping2').textContent = `¥${shippingCostJPY.toFixed(0)} (${getShippingMethodDisplayName(effectiveMethod2)})`;
+
+            // 関税額の比較表示
+            document.getElementById('actualTariff2').textContent = `$${tariffAmounts.actualTariff.toFixed(2)}`;
+            document.getElementById('adjustedTariff2').textContent = `$${tariffAmounts.adjustedTariff.toFixed(2)}`;
+            document.getElementById('tariffDiff2').textContent = `+$${tariffAmounts.difference.toFixed(2)}`;
+
+            // 計算過程の詳細表示
+            const tariffRatePercent = (settings.tariffRate * 100).toFixed(1);
+            const feeRatePercent = (settings.feeRate * 100).toFixed(1);
+            const adRatePercent = (settings.adRate * 100).toFixed(1);
+            const safetyMarginPercent = (settings.safetyMargin * 100).toFixed(1);
+            const adjustedTariffRatePercent = (tariffAmounts.adjustedTariffRate * 100).toFixed(2);
+
+            document.getElementById('tariffCalcDetail2').innerHTML = `
+                <strong>【計算過程】</strong><br>
+                調整関税率 = ${tariffRatePercent}% ÷ (1 - ${feeRatePercent}% - ${adRatePercent}%) × (1 + ${safetyMarginPercent}%)<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <strong>${adjustedTariffRatePercent}%</strong><br><br>
+                実際の関税額 = $${sellingPriceUSD.toFixed(2)} × ${tariffRatePercent}% × ... = <strong>$${tariffAmounts.actualTariff.toFixed(2)}</strong><br>
+                調整後関税額 = $${sellingPriceUSD.toFixed(2)} × ${adjustedTariffRatePercent}% × ... = <strong>$${tariffAmounts.adjustedTariff.toFixed(2)}</strong>
+            `;
         }
 
         // 計算3: 利益額で販売価格→仕入れ
@@ -1820,12 +1923,9 @@
                 costDDU, settings.actualWeight, settings.shippingMethod,
                 settings.shippingThreshold, settings.lowPriceMethod, settings.highPriceMethod
             );
-            const customsFeeJPY3DDU = (effectiveMethod3DDU === 'CE') ? settings.ceMpf : 0;
-            const tariffDDU = sellingPriceDDU * settings.tariffRate * (1 + settings.processingFeeRate)
-                            + sellingPriceDDU * settings.vatRate * settings.processingFeeRate
-                            + (customsFeeJPY3DDU / settings.exchangeRate)
-                            + settings.mpfUsd
-                            + (settings.euShippingDiff / settings.exchangeRate);
+            // 調整関税率を使用
+            const tariffAmountsDDU = calculateTariffAmounts(sellingPriceDDU, settings, effectiveMethod3DDU);
+            const tariffDDU = tariffAmountsDDU.adjustedTariff;
 
             // DDP価格ベースで参考利益計算
             const ddpPriceDDU = sellingPriceDDU + tariffDDU;
@@ -1845,14 +1945,11 @@
                 costDDU, settings.actualWeight, settings.shippingMethod,
                 settings.shippingThreshold, settings.lowPriceMethod, settings.highPriceMethod
             );
-            const customsFeeJPY3DDP = (effectiveMethod3DDP === 'CE') ? settings.ceMpf : 0;
 
             for (let i = 0; i < 10; i++) {
-                tariffDDP = sellingPriceDDU_fromDDP * settings.tariffRate * (1 + settings.processingFeeRate)
-                          + sellingPriceDDU_fromDDP * settings.vatRate * settings.processingFeeRate
-                          + (customsFeeJPY3DDP / settings.exchangeRate)
-                          + settings.mpfUsd
-                          + (settings.euShippingDiff / settings.exchangeRate);
+                // 調整関税率を使用
+                const tariffAmountsDDP = calculateTariffAmounts(sellingPriceDDU_fromDDP, settings, effectiveMethod3DDP);
+                tariffDDP = tariffAmountsDDP.adjustedTariff;
 
                 const newSellingPrice = ddpPriceInput - tariffDDP;
                 if (Math.abs(newSellingPrice - sellingPriceDDU_fromDDP) < 0.01) break;
@@ -1955,12 +2052,9 @@
                 costDDU, settings.actualWeight, settings.shippingMethod,
                 settings.shippingThreshold, settings.lowPriceMethod, settings.highPriceMethod
             );
-            const customsFeeJPY4DDU = (effectiveMethod4DDU === 'CE') ? settings.ceMpf : 0;
-            const tariffDDU = sellingPriceDDU * settings.tariffRate * (1 + settings.processingFeeRate)
-                            + sellingPriceDDU * settings.vatRate * settings.processingFeeRate
-                            + (customsFeeJPY4DDU / settings.exchangeRate)
-                            + settings.mpfUsd
-                            + (settings.euShippingDiff / settings.exchangeRate);
+            // 調整関税率を使用
+            const tariffAmounts4DDU = calculateTariffAmounts(sellingPriceDDU, settings, effectiveMethod4DDU);
+            const tariffDDU = tariffAmounts4DDU.adjustedTariff;
 
             // DDP価格ベースで参考利益計算
             const ddpPriceDDU = sellingPriceDDU + tariffDDU;
@@ -1980,14 +2074,11 @@
                 costDDU, settings.actualWeight, settings.shippingMethod,
                 settings.shippingThreshold, settings.lowPriceMethod, settings.highPriceMethod
             );
-            const customsFeeJPY4DDP = (effectiveMethod4DDP === 'CE') ? settings.ceMpf : 0;
 
             for (let i = 0; i < 10; i++) {
-                tariffDDP = sellingPriceDDU_fromDDP * settings.tariffRate * (1 + settings.processingFeeRate)
-                          + sellingPriceDDU_fromDDP * settings.vatRate * settings.processingFeeRate
-                          + (customsFeeJPY4DDP / settings.exchangeRate)
-                          + settings.mpfUsd
-                          + (settings.euShippingDiff / settings.exchangeRate);
+                // 調整関税率を使用
+                const tariffAmounts4DDP = calculateTariffAmounts(sellingPriceDDU_fromDDP, settings, effectiveMethod4DDP);
+                tariffDDP = tariffAmounts4DDP.adjustedTariff;
 
                 const newSellingPrice = ddpPriceInput - tariffDDP;
                 if (Math.abs(newSellingPrice - sellingPriceDDU_fromDDP) < 0.01) break;
