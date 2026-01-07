@@ -1543,13 +1543,15 @@
 
         // UIから燃油サーチャージ・割引設定を取得
         function getShippingConfig() {
-            return {
+            const config = {
                 fedexFuel: (parseFloat(document.getElementById('fedexFuelRate').value) || 29.75) / 100,
                 dhlFuel: (parseFloat(document.getElementById('dhlFuelRate').value) || 30) / 100,
                 cpassDiscount: (parseFloat(document.getElementById('cpassDiscountRate').value) || 3) / 100,
                 fedexExtraPer500g: parseFloat(document.getElementById('fedexExtraPer500g').value) || 115,
                 dhlExtraPer500g: parseFloat(document.getElementById('dhlExtraPer500g').value) || 96
             };
+            console.log('getShippingConfig called:', config);
+            return config;
         }
 
         // モード切替
