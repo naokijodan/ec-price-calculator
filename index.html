@@ -663,6 +663,33 @@
                     </div>
                 </div>
 
+                <!-- 燃油サーチャージ・割引設定 -->
+                <div style="margin-top: 20px; padding: 20px; background: #fff3e0; border: 2px solid #ff9800; border-radius: 8px;">
+                    <h3 style="margin-bottom: 15px; color: #e65100;">⛽ 燃油サーチャージ・割引設定</h3>
+                    <div class="settings-grid">
+                        <div class="input-group">
+                            <label>FedEx燃油サーチャージ (%)</label>
+                            <input type="number" id="fedexFuelRate" value="29.75" step="0.25">
+                        </div>
+                        <div class="input-group">
+                            <label>DHL燃油サーチャージ (%)</label>
+                            <input type="number" id="dhlFuelRate" value="30" step="0.25">
+                        </div>
+                        <div class="input-group">
+                            <label>Cpass割引 (%)</label>
+                            <input type="number" id="cpassDiscountRate" value="3" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>FedEx超過料金 (円/500g)</label>
+                            <input type="number" id="fedexExtraPer500g" value="115" step="1">
+                        </div>
+                        <div class="input-group">
+                            <label>DHL超過料金 (円/500g)</label>
+                            <input type="number" id="dhlExtraPer500g" value="96" step="1">
+                        </div>
+                    </div>
+                </div>
+
                 <!-- テーブル計算モード -->
                 <div id="tableShippingSettings" class="hidden" style="padding: 20px; background: #e3f2fd; border: 2px solid #2196f3; border-radius: 8px;">
                     <h3 style="margin-bottom: 15px; color: #1565c0;">📦 テーブル計算設定</h3>
@@ -1514,13 +1541,16 @@
             ]
         };
 
-        const SHIPPING_CONFIG = {
-            fedexFuel: 0.2975,
-            dhlFuel: 0.3,
-            cpassDiscount: 0.03,
-            fedexExtraPer500g: 115,
-            dhlExtraPer500g: 96
-        };
+        // UIから燃油サーチャージ・割引設定を取得
+        function getShippingConfig() {
+            return {
+                fedexFuel: (parseFloat(document.getElementById('fedexFuelRate').value) || 29.75) / 100,
+                dhlFuel: (parseFloat(document.getElementById('dhlFuelRate').value) || 30) / 100,
+                cpassDiscount: (parseFloat(document.getElementById('cpassDiscountRate').value) || 3) / 100,
+                fedexExtraPer500g: parseFloat(document.getElementById('fedexExtraPer500g').value) || 115,
+                dhlExtraPer500g: parseFloat(document.getElementById('dhlExtraPer500g').value) || 96
+            };
+        }
 
         // モード切替
         function toggleShippingMode() {
@@ -1656,6 +1686,7 @@
 
         // Cpass-FedEx 料金計算
         function getCpassFedexRate(weight) {
+            const config = getShippingConfig();
             const rounded = Math.ceil(weight / 500) * 500;
             let base = null;
 
@@ -1669,15 +1700,16 @@
             if (!base) return 999999;
 
             const overUnits = Math.max(0, (rounded - 500) / 500);
-            const extra = overUnits * SHIPPING_CONFIG.fedexExtraPer500g;
+            const extra = overUnits * config.fedexExtraPer500g;
             const subTotal = base + extra;
-            const fuel = subTotal * SHIPPING_CONFIG.fedexFuel;
-            const discount = -(subTotal + fuel) * SHIPPING_CONFIG.cpassDiscount;
+            const fuel = subTotal * config.fedexFuel;
+            const discount = -(subTotal + fuel) * config.cpassDiscount;
             return Math.round(subTotal + fuel + discount);
         }
 
         // Cpass-DHL 料金計算
         function getCpassDHLRate(weight) {
+            const config = getShippingConfig();
             const rounded = Math.ceil(weight / 500) * 500;
             let base = null;
 
@@ -1691,10 +1723,10 @@
             if (!base) return 999999;
 
             const overUnits = Math.max(0, (rounded - 500) / 500);
-            const extra = overUnits * SHIPPING_CONFIG.dhlExtraPer500g;
+            const extra = overUnits * config.dhlExtraPer500g;
             const subTotal = base + extra;
-            const fuel = subTotal * SHIPPING_CONFIG.dhlFuel;
-            const discount = -(subTotal + fuel) * SHIPPING_CONFIG.cpassDiscount;
+            const fuel = subTotal * config.dhlFuel;
+            const discount = -(subTotal + fuel) * config.cpassDiscount;
             return Math.round(subTotal + fuel + discount);
         }
 
