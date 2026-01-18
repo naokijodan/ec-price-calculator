@@ -2242,41 +2242,10 @@
                 settings.shippingThreshold, settings.lowPriceMethod, settings.highPriceMethod
             );
 
-            // 反復計算で販売価格を求める（目標利益率が得られる販売価格を探す）
-            // 初期値：大まかな見積もり
-            let sellingPriceUSD = (costJPY + shippingCostJPY) / settings.exchangeRate / (0.7 - targetProfitRate);
+            // V3と同じ計算式: DDU販売価格 = (仕入れ + 送料) ÷ (1 - 手数料率 - 利益率 - 広告率 - Payoneer率) ÷ 為替
+            const sellingPriceUSD = (costJPY + shippingCostJPY) / (1 - settings.feeRate - targetProfitRate - settings.adRate - settings.payoneerRate) / settings.exchangeRate;
 
-            for (let i = 0; i < 20; i++) {
-                // 現在の販売価格での関税計算
-                const tariffAmounts = calculateTariffAmounts(sellingPriceUSD, settings, effectiveMethod2);
-
-                // DDP価格 = 販売価格 + 調整後関税額
-                const ddpPrice = sellingPriceUSD + tariffAmounts.adjustedTariff;
-
-                // 正しい資金フローで利益を計算
-                const ddpPriceJPY = ddpPrice * settings.exchangeRate;
-                const ebayFeeJPY = ddpPriceJPY * settings.feeRate;
-                const adFeeJPY = ddpPriceJPY * settings.adRate;
-                const afterEbayFees = ddpPriceJPY - ebayFeeJPY - adFeeJPY;
-                const payoneerFeeJPY = afterEbayFees * settings.payoneerRate;
-                const afterPayoneer = afterEbayFees - payoneerFeeJPY;
-                const actualTariffJPY = tariffAmounts.actualTariff * settings.exchangeRate;
-                const calculatedProfit = afterPayoneer - actualTariffJPY - costJPY - shippingCostJPY;
-
-                // 現在の利益率を計算（DDP価格ベース）
-                const currentProfitRate = calculatedProfit / ddpPriceJPY;
-
-                // 目標利益率との差分
-                const rateDiff = targetProfitRate - currentProfitRate;
-
-                // 収束判定
-                if (Math.abs(rateDiff) < 0.0001) break;
-
-                // 販売価格を調整
-                sellingPriceUSD *= (1 + rateDiff);
-            }
-
-            // 最終的な関税計算
+            // 関税計算
             const tariffAmounts = calculateTariffAmounts(sellingPriceUSD, settings, effectiveMethod2);
 
             // DDP価格 = 販売価格 + 調整後関税額
