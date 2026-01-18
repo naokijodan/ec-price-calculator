@@ -2250,24 +2250,11 @@
 
             // DDP価格 = 販売価格 + 調整後関税額
             const ddpPrice = sellingPriceUSD + tariffAmounts.adjustedTariff;
-
-            // 参考利益（実際の資金フローに基づく計算）
-            // 1. DDP価格（eBayで受け取る金額）
             const ddpPriceJPY = ddpPrice * settings.exchangeRate;
-            // 2. eBay手数料を引く
-            const ebayFeeJPY = ddpPriceJPY * settings.feeRate;
-            // 3. 広告費を引く
-            const adFeeJPY = ddpPriceJPY * settings.adRate;
-            // 4. ペイオニアで受け取る金額
-            const afterEbayFees = ddpPriceJPY - ebayFeeJPY - adFeeJPY;
-            // 5. ペイオニア手数料を引く
-            const payoneerFeeJPY = afterEbayFees * settings.payoneerRate;
-            const afterPayoneer = afterEbayFees - payoneerFeeJPY;
-            // 6. 実際の関税額を引く（調整後ではなく実際に支払う関税）
-            const actualTariffJPY = tariffAmounts.actualTariff * settings.exchangeRate;
-            const afterTariff = afterPayoneer - actualTariffJPY;
-            // 7. 仕入れ・送料を引く
-            const refProfit = afterTariff - costJPY - shippingCostJPY;
+
+            // V3と同じ参考利益計算: DDU販売価格(円) × 利益率
+            const sellingPriceJPY = sellingPriceUSD * settings.exchangeRate;
+            const refProfit = sellingPriceJPY * targetProfitRate;
 
             document.getElementById('result2').classList.remove('hidden');
             document.getElementById('sellingPrice2').textContent = `$${sellingPriceUSD.toFixed(2)}`;
@@ -2295,33 +2282,21 @@
                 調整後関税額 = $${sellingPriceUSD.toFixed(2)} × ${adjustedTariffRatePercent}% × ... = <strong>$${tariffAmounts.adjustedTariff.toFixed(2)}</strong>
             `;
 
-            // 利益計算の詳細表示
+            // 利益計算の詳細表示（V3方式）
             const payoneerRatePercent = (settings.payoneerRate * 100).toFixed(1);
             const profitRatePercent = (targetProfitRate * 100).toFixed(1);
-            const totalFees = ebayFeeJPY + adFeeJPY + payoneerFeeJPY;
-            const profitRateActual = (refProfit / ddpPriceJPY * 100).toFixed(1);
 
             document.getElementById('profitCalcDetail2').innerHTML = `
-                <strong>【利益計算の詳細（実際の資金フロー）】</strong><br><br>
-                <strong>① DDP価格（eBayで受け取る金額）</strong><br>
-                &nbsp;&nbsp;DDP価格 × 為替 = $${ddpPrice.toFixed(2)} × ¥${settings.exchangeRate.toFixed(2)} = <strong>¥${ddpPriceJPY.toFixed(0)}</strong><br><br>
-                <strong>② eBay手数料・広告費を引く</strong><br>
-                &nbsp;&nbsp;eBay手数料 = ¥${ddpPriceJPY.toFixed(0)} × ${feeRatePercent}% = <strong>¥${ebayFeeJPY.toFixed(0)}</strong><br>
-                &nbsp;&nbsp;広告費 = ¥${ddpPriceJPY.toFixed(0)} × ${adRatePercent}% = <strong>¥${adFeeJPY.toFixed(0)}</strong><br>
-                &nbsp;&nbsp;eBay手数料後 = ¥${ddpPriceJPY.toFixed(0)} - ¥${ebayFeeJPY.toFixed(0)} - ¥${adFeeJPY.toFixed(0)} = <strong>¥${afterEbayFees.toFixed(0)}</strong><br><br>
-                <strong>③ ペイオニア手数料を引く</strong><br>
-                &nbsp;&nbsp;ペイオニア = ¥${afterEbayFees.toFixed(0)} × ${payoneerRatePercent}% = <strong>¥${payoneerFeeJPY.toFixed(0)}</strong><br>
-                &nbsp;&nbsp;ペイオニア後 = ¥${afterEbayFees.toFixed(0)} - ¥${payoneerFeeJPY.toFixed(0)} = <strong>¥${afterPayoneer.toFixed(0)}</strong><br><br>
-                <strong>④ 実際の関税額を引く</strong><br>
-                &nbsp;&nbsp;実際の関税額 = $${tariffAmounts.actualTariff.toFixed(2)} × ¥${settings.exchangeRate.toFixed(2)} = <strong>¥${actualTariffJPY.toFixed(0)}</strong><br>
-                &nbsp;&nbsp;関税支払後 = ¥${afterPayoneer.toFixed(0)} - ¥${actualTariffJPY.toFixed(0)} = <strong>¥${afterTariff.toFixed(0)}</strong><br><br>
-                <strong>⑤ 仕入れ・送料を引く</strong><br>
+                <strong>【利益計算の詳細（V3方式）】</strong><br><br>
+                <strong>① DDU販売価格</strong><br>
+                &nbsp;&nbsp;DDU価格 × 為替 = $${sellingPriceUSD.toFixed(2)} × ¥${settings.exchangeRate.toFixed(2)} = <strong>¥${sellingPriceJPY.toFixed(0)}</strong><br><br>
+                <strong>② 利益額</strong><br>
+                &nbsp;&nbsp;利益 = DDU販売価格(円) × 利益率<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= ¥${sellingPriceJPY.toFixed(0)} × ${profitRatePercent}%<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <strong style="color: #2e7d32; font-size: 1.2em;">¥${refProfit.toFixed(0)}</strong><br><br>
+                <strong>【参考】入力値</strong><br>
                 &nbsp;&nbsp;仕入れ価格 = <strong>¥${costJPY.toFixed(0)}</strong><br>
-                &nbsp;&nbsp;送料 = <strong>¥${shippingCostJPY.toFixed(0)}</strong><br><br>
-                <strong>⑥ 利益額・利益率</strong><br>
-                &nbsp;&nbsp;利益 = ¥${afterTariff.toFixed(0)} - ¥${costJPY.toFixed(0)} - ¥${shippingCostJPY.toFixed(0)}<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <strong style="color: #2e7d32; font-size: 1.2em;">¥${refProfit.toFixed(0)}</strong><br>
-                &nbsp;&nbsp;利益率 = 利益 ÷ DDP売上 = ¥${refProfit.toFixed(0)} ÷ ¥${ddpPriceJPY.toFixed(0)} = <strong>${profitRateActual}%</strong> （設定: ${profitRatePercent}%）
+                &nbsp;&nbsp;送料 = <strong>¥${shippingCostJPY.toFixed(0)}</strong>
             `;
 
             // シッピングポリシー判定
